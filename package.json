@@ -1,0 +1,32 @@
+{
+  "name": "dongbang",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodemon --exec babel-node index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/LimSeHyeon/dongbang.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/LimSeHyeon/dongbang/issues"
+  },
+  "homepage": "https://github.com/LimSeHyeon/dongbang#readme",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^5.1.0",
+    "http-status-codes": "^2.3.0"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.28.3",
+    "@babel/core": "^7.28.5",
+    "@babel/node": "^7.28.0",
+    "@babel/preset-env": "^7.28.5",
+    "nodemon": "^3.1.11"
+  }
+}
