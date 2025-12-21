@@ -4,14 +4,14 @@ import { status } from "../Config/response.status.js";
 import redisClient from '../Config/redis.js';
 
 export const saveRequest = async(requestInfo) => {
-    const { song_name, start_time, hapju_term } = requestInfo;
+    const { songName, startTime, hapjuTerm } = requestInfo;
     const requestId = `booking_req:${uuidv4()}`;
 
     const reservationInfo = {
-        song_name,
-        start_time,
-        hapju_term,
-        requested_at: new Date().toISOString()
+        songName,
+        startTime,
+        hapjuTerm,
+        requestedAt: new Date().toISOString()
     };
 
     console.log(reservationInfo);

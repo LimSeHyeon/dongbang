@@ -3,9 +3,12 @@ import { response } from "./src/Config/response.js";
 import cors from 'cors';
 import { adminRouter } from './src/Admin/adminRouter.js';
 import { reserveRouter } from './src/Reserve/reserveRouter.js';
+import { syncReservationsToDB } from './src/Utils/scheduler.js';
 
 const app = express()
 const port = 3000
+
+syncReservationsToDB();
 
 app.use(cors()); // cors 오류 방지
 app.use(express.static('public')); 
