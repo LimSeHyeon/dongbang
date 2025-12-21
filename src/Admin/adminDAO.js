@@ -13,10 +13,25 @@ export const getPassword = async() => {
         return result[0];
     } catch (err) {
         console.error(err);
-        throw new BaseError(
-            status.PARAMETER_IS_WRONG,
-            "DB 쿼리 실행 중 에러 발생"
-        );
+        throw new BaseError({
+            ...status.DB_ERROR,
+            message: err.message
+        });
+    }
+}
+
+//관리자 비밀번호 변경
+export const updatePassword = async(newPassword) => {
+    const query = "UPDATE manage SET password = ? WHERE manage_id = ?";
+    try {
+        const [result] = await pool.query(query, [newPassword, 1]);
+        return;
+    } catch (err) {
+        console.error(err);
+        throw new BaseError({
+            ...status.DB_ERROR,
+            message: err.message
+        });
     }
 }
 
@@ -29,9 +44,26 @@ export const getSetting = async () => {
         return AdminDTO.settingInfoDTO(result[0]);
     } catch (err) {
         console.error(err);
-        throw new BaseError(
-            status.PARAMETER_IS_WRONG,
-            "DB 쿼리 실행 중 에러 발생"
-        );
+        throw new BaseError({
+            ...status.DB_ERROR,
+            message: err.message
+        });
     }
 };
+
+//설정 변경
+export const updateSetting = async (newSetting) => {
+    const query = "UPDATE settings SET open_weekday=?, open_time=?, max_use_time = ? WHERE settings_id = ?";
+    console.log("newSetting ", newSetting)
+    try {
+        const [result] = await pool.query(query, [newSetting.open_weekday, newSetting.open_time, newSetting.max_use_time, 1]);
+        return;
+    } catch (err) {
+        console.error(err);
+        throw new BaseError({
+            ...status.DB_ERROR,
+            message: err.message
+        });
+    }
+}
+

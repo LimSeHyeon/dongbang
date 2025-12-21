@@ -5,3 +5,7 @@ import {verifyAdmin } from './adminMiddleware.js';
 export const adminRouter = express.Router();
 
 adminRouter.post('', verifyAdmin, AdminController.getSettingInfo);
+
+adminRouter.patch('/setting', AdminController.changeSettingInfo);
+
+adminRouter.patch('/password', AdminController.changePassword);
