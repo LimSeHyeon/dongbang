@@ -1,6 +1,7 @@
 {
   "name": "dongbang",
   "version": "1.0.0",
+  "type": "module",
   "description": "",
   "main": "index.js",
   "scripts": {
@@ -22,7 +23,9 @@
     "dotenv": "^17.2.3",
     "express": "^5.1.0",
     "http-status-codes": "^2.3.0",
-    "mysql2": "^3.16.0"
+    "mysql2": "^3.16.0",
+    "redis": "^5.10.0",
+    "uuid": "^13.0.0"
   },
   "devDependencies": {
     "@babel/cli": "^7.28.3",

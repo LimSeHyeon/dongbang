@@ -1,7 +1,8 @@
 import express from 'express';
-import { adminRouter } from './src/Admin/adminRouter';
 import { response } from "./src/Config/response.js";
 import cors from 'cors';
+import { adminRouter } from './src/Admin/adminRouter.js';
+import { reserveRouter } from './src/Reserve/reserveRouter.js';
 
 const app = express()
 const port = 3000
@@ -12,6 +13,7 @@ app.use(express.json()); // body에 필요
 
 // router setting
 app.use('/admin', adminRouter);
+app.use('/reserve', reserveRouter);
 
 
 app.use((err, req, res, next) => {
