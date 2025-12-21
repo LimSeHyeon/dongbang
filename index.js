@@ -1,5 +1,5 @@
 import express from 'express';
-import { tempRouter } from './src/routes/tmp.route';
+import { adminRouter } from './src/Admin/adminRouter';
 import cors from 'cors';
 
 const app = express()
@@ -10,7 +10,7 @@ app.use(express.static('public'));
 app.use(express.json()); // body에 필요
 
 // router setting
-app.use('/tmp', tempRouter);
+app.use('/admin', adminRouter);
 
 app.listen(port, () => {
     console.log(`Example app listening on port ${port}`)
