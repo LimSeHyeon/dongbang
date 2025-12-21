@@ -40,6 +40,7 @@ export const syncReservationsToDB = async () => {
                 connection.release();
             }
         }
+        console.log("예약처리 종료");
     } catch (error) {
         console.log("배치 중 오류 발생", error);
     }

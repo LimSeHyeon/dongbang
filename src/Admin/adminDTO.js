@@ -7,8 +7,8 @@ export const convertWeekday = (dayNum) => {
 
 export const settingInfoDTO = (data) => {
      return {
-         "open_weekday" : convertWeekday(data.open_weekday),
-         "open_time" : data.open_time,
-         "max_use_time" : data.max_use_time
+         "openWeekday" : convertWeekday(data.open_weekday),
+         "openTime" : data.open_time,
+         "maxUseTime" : data.max_use_time
      };
 }

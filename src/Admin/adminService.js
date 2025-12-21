@@ -11,7 +11,8 @@ export const getSetting = async() => {
 
 export const updateSetting = async(newSetting) => {
     await AdminDAO.updateSetting(newSetting);
-    return await AdminDAO.getSetting();
+    const result = await AdminDAO.getSetting();
+    return AdminDTO.settingInfoDTO(result);
 }
 
 export const updatePassword = async(req) => {

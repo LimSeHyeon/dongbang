@@ -54,7 +54,7 @@ export const updateSetting = async (newSetting) => {
     const query = "UPDATE settings SET open_weekday=?, open_time=?, max_use_time = ? WHERE settings_id = ?";
     console.log("newSetting ", newSetting)
     try {
-        const [result] = await pool.query(query, [newSetting.open_weekday, newSetting.open_time, newSetting.max_use_time, 1]);
+        const [result] = await pool.query(query, [newSetting.openWeekday, newSetting.openTime, newSetting.maxUseTime, 1]);
         return;
     } catch (err) {
         console.error(err);
