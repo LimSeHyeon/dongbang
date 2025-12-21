@@ -1,7 +1,7 @@
 import cron from 'node-cron';
 
 import redisClient from '../Config/redis.js';
-import { pool } from '../Config/db.connect.js';
+import * as ReserveDAO from '../Reserve/reserveDAO.js';
 
 export const syncReservationsToDB = async () => {
     console.log("예약 처리 시작");
@@ -16,28 +16,18 @@ export const syncReservationsToDB = async () => {
             const { songName, startTime, hapjuTerm, requestedAt } = JSON.parse(data);
 
             const requestTime = new Date(requestedAt);
+            const startTimeDate = new Date(startTime);
+            const endTime = new Date(startTimeDate.getTime() + hapjuTerm * 60 * 60 * 1000);
 
-            //트랜잭션 사용
-            const connection = await pool.getConnection();
             try {
-                await connection.beginTransaction();
-
-                const query = `
-                    INSERT INTO reserve_history (song_name, start_time, hapju_term, request_time)
-                    VALUES (?, ?, ?, ?)
-                `;
-                await connection.execute(query, [songName, startTime, hapjuTerm, requestTime]);
-
-                // 3. DB 저장 성공 시 Redis에서 해당 키 삭제
+                //히스토리 저장
+                await ReserveDAO.saveHistory(songName, startTime, hapjuTerm, requestTime)
+                //DB 저장 성공 시 Redis 키 삭제
                 await redisClient.del(key);
-
-                await connection.commit();
                 console.log(`성공: ${songName} (${startTime})`);
             } catch (err) {
                 await connection.rollback();
                 console.error(`실패 (${songName}):`, err.message);
-            } finally {
-                connection.release();
             }
         }
         console.log("예약처리 종료");
