@@ -2,9 +2,11 @@ import { BaseError } from "../Config/error.js";
 import { status } from "../Config/response.status.js";
 
 import * as AdminDAO from './adminDAO.js';
+import * as AdminDTO from "./adminDTO.js";
 
 export const getSetting = async() => {
-    return AdminDAO.getSetting();
+    const result = await AdminDAO.getSetting();
+    return AdminDTO.settingInfoDTO(result);
 }
 
 export const updateSetting = async(newSetting) => {

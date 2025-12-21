@@ -2,8 +2,6 @@ import { pool } from "../Config/db.connect.js";
 import { BaseError } from "../Config/error.js";
 import { status } from "../Config/response.status.js";
 
-import * as AdminDTO from "./adminDTO.js";
-
 
 //비밀번호 조회(관리자 확인용)
 export const getPassword = async() => {
@@ -41,7 +39,7 @@ export const getSetting = async () => {
     try {
         const [result] = await pool.query(query);
         console.log("result : ", result[0]);
-        return AdminDTO.settingInfoDTO(result[0]);
+        return result[0];
     } catch (err) {
         console.error(err);
         throw new BaseError({
