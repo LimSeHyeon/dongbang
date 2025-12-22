@@ -15,14 +15,16 @@ export const syncReservationsToDB = async () => {
 
             const { songName, startTime, hapjuTerm, requestedAt } = JSON.parse(data);
 
-            const startTimeDate = new Date(startTime);
-            const endTime = new Date(startTimeDate.getTime() + hapjuTerm * 60 * 60 * 1000);
-
-            //히스토리 저장 후 키 삭제
             try {
-                await ReserveService.saveHistory({ songName, startTime, hapjuTerm, requestedAt 
+                //히스토리 저장 후 키 삭제
+                await ReserveService.saveHistory({ 
+                    songName, startTime, hapjuTerm, requestedAt 
                 });
                 await redisClient.del(key);
+                //실제 예약 실행
+                await ReserveService.createReservation({ 
+                    songName, startTime, hapjuTerm, requestedAt 
+                });
                 console.log(`성공: ${songName} (${startTime})`);
             } catch (err) {
                 console.error(`실패 (${songName}):`, err.message);

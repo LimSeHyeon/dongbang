@@ -27,7 +27,7 @@ export const saveHistory = async(songName, startTime, hapjuTerm, requestTime) =>
 }
 
 //날짜별 예약 조회
-export const getReserveByDate = async(startTime, endTime) => {
+export const getReserveByDate = async(connection, startTime, endTime) => {
     const query = `
             SELECT start_time, end_time 
             FROM reservation 
@@ -36,6 +36,25 @@ export const getReserveByDate = async(startTime, endTime) => {
             ORDER BY start_time ASC
             FOR UPDATE;
         `;
-        const [rows] = await connection.execute(query, [date, endTime, startTime]);
+        const [rows] = await connection.execute(query, [endTime, startTime]);
         return rows;
+}
+
+//예약 실행
+export const createReservation = async (songName, startTime, endTime, requestTime) => {
+    const connection = await pool.getConnection();
+
+    try {
+        await connection.beginTransaction();
+
+        const existingReserve = await getReserveByDate(connection, startTime, endTime);
+        console.log(existingReserve);
+        await connection.commit();
+        return;
+    } catch (err) {
+        await connection.rollback();
+        throw err;
+    } finally {
+        connection.release();
+    }
 }

@@ -2,6 +2,8 @@ import { v4 as uuidv4 } from 'uuid';
 import { BaseError } from "../Config/error.js";
 import { status } from "../Config/response.status.js";
 import redisClient from '../Config/redis.js';
+import * as ReserveDAO from './reserveDAO.js';
+import { formatDate } from '../Utils/dateConverter.js';
 
 export const saveRequest = async(requestInfo) => {
     const { songName, startTime, hapjuTerm } = requestInfo;
@@ -35,6 +37,20 @@ export const saveRequest = async(requestInfo) => {
 }
 
 export const saveHistory = async({ songName, startTime, hapjuTerm, requestedAt }) => {
-    await ReserveDAO.saveHistory(songName, startTime, hapjuTerm, new Date(requestedAt));
+    const startTimeDate = new Date(startTime);
+    const formattedStart = formatDate(startTimeDate);
+    const formattedRequest = formatDate(new Date(requestedAt));
+    await ReserveDAO.saveHistory(songName, formattedStart, hapjuTerm, formattedRequest);
     return;
+}
+
+export const createReservation = async({ songName, startTime, hapjuTerm, requestedAt }) => {
+    const startTimeDate = new Date(startTime);
+    const endTimeDate = new Date(startTimeDate.getTime() + hapjuTerm * 60 * 60 * 1000);
+    
+    const formattedStart = formatDate(startTimeDate);
+    const formattedEnd = formatDate(endTimeDate);
+    const formattedRequest = formatDate(new Date(requestedAt));
+
+    await ReserveDAO.createReservation(songName, formattedStart, formattedEnd, formattedRequest);
 }
