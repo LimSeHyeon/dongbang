@@ -33,3 +33,8 @@ export const saveRequest = async(requestInfo) => {
         });
     }
 }
+
+export const saveHistory = async({ songName, startTime, hapjuTerm, requestedAt }) => {
+    await ReserveDAO.saveHistory(songName, startTime, hapjuTerm, new Date(requestedAt));
+    return;
+}

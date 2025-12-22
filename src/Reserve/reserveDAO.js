@@ -16,6 +16,7 @@ export const saveHistory = async(songName, startTime, hapjuTerm, requestTime) =>
         return;
     } catch (err) {
         console.error(err);
+        await connection.rollback();
         throw new BaseError({
             ...status.DB_ERROR,
             message: err.message
@@ -23,7 +24,6 @@ export const saveHistory = async(songName, startTime, hapjuTerm, requestTime) =>
     } finally {
         connection.release();
     }
-    
 }
 
 //날짜별 예약 조회
