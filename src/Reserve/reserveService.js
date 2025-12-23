@@ -4,6 +4,7 @@ import moment from 'moment-timezone';
 import { status } from "../Config/response.status.js";
 import redisClient from '../Config/redis.js';
 import * as ReserveDAO from './reserveDAO.js';
+import * as AdminDAO from '../Admin/adminDAO.js';
 import { formatDate } from '../Utils/dateConverter.js';
 
 export const saveRequest = async(requestInfo) => {
@@ -46,7 +47,10 @@ export const saveHistory = async({ songName, startTime, hapjuTerm, requestedAt }
 
 export const createReservation = async({ songName, startTime, hapjuTerm, requestedAt }) => {
     const startTimeDate = moment(startTime).tz('Asia/Seoul');
-    const endTimeDate = startTimeDate.clone().add(hapjuTerm, 'hours');
+    const setting = await AdminDAO.getSetting();
+    const maxUseTime = setting.max_use_time;
+    const useTime = (hapjuTerm < maxUseTime) ? hapjuTerm : maxUseTime;
+    const endTimeDate = startTimeDate.clone().add(useTime, 'hours');
     
     const formattedStart = startTimeDate.format('YYYY-MM-DD HH:mm:ss');
     const formattedEnd = endTimeDate.format('YYYY-MM-DD HH:mm:ss');
