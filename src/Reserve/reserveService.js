@@ -47,10 +47,17 @@ export const saveHistory = async({ songName, startTime, hapjuTerm, requestedAt }
 
 export const createReservation = async({ songName, startTime, hapjuTerm, requestedAt }) => {
     const startTimeDate = moment(startTime).tz('Asia/Seoul');
+    //최대 예약 시간 초과 방지
     const setting = await AdminDAO.getSetting();
     const maxUseTime = setting.max_use_time;
     const useTime = (hapjuTerm < maxUseTime) ? hapjuTerm : maxUseTime;
-    const endTimeDate = startTimeDate.clone().add(useTime, 'hours');
+    let endTimeDate = startTimeDate.clone().add(useTime, 'hours');
+    
+    //자정 안 넘어가도록
+    const endOfDay = startTimeDate.clone().endOf('day');
+    if (endTimeDate.isAfter(endOfDay)) {
+        endTimeDate = startTimeDate.clone().add(1, 'day').startOf('day');
+    }
     
     const formattedStart = startTimeDate.format('YYYY-MM-DD HH:mm:ss');
     const formattedEnd = endTimeDate.format('YYYY-MM-DD HH:mm:ss');
