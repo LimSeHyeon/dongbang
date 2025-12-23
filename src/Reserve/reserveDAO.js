@@ -104,3 +104,18 @@ export const createReservation = async (songName, startTime, endTime, requestTim
         connection.release();
     }
 }
+
+export const deleteReserve = async(reservationId) => {
+    const query = `DELETE FROM reservation WHERE reservation_id = ?;`;
+    try {
+        const [result] = await pool.query(query, [reservationId]);
+        return result.affectedRows>0;
+    }
+    catch (err) {
+        console.error(err);
+        throw new BaseError({
+            ...status.DB_ERROR,
+            message: err.message
+        });
+    }
+}

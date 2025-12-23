@@ -64,4 +64,11 @@ export const createReservation = async({ songName, startTime, hapjuTerm, request
     const formattedRequest = moment(requestedAt).tz('Asia/Seoul').format('YYYY-MM-DD HH:mm:ss');
 
     await ReserveDAO.createReservation(songName, formattedStart, formattedEnd, formattedRequest);
+    return;
+}
+
+export const cancelReserve = async(reservationId) => {
+    const isDeleted = await ReserveDAO.deleteReserve(reservationId);
+    if(!isDeleted) throw new BaseError(status.DATA_NOT_DELETED);
+    return {"deleted": reservationId};
 }
