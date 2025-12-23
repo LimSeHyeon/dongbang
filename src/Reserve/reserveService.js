@@ -1,5 +1,6 @@
 import { v4 as uuidv4 } from 'uuid';
 import { BaseError } from "../Config/error.js";
+import moment from 'moment-timezone';
 import { status } from "../Config/response.status.js";
 import redisClient from '../Config/redis.js';
 import * as ReserveDAO from './reserveDAO.js';
@@ -39,18 +40,17 @@ export const saveRequest = async(requestInfo) => {
 export const saveHistory = async({ songName, startTime, hapjuTerm, requestedAt }) => {
     const startTimeDate = new Date(startTime);
     const formattedStart = formatDate(startTimeDate);
-    const formattedRequest = formatDate(new Date(requestedAt));
-    await ReserveDAO.saveHistory(songName, formattedStart, hapjuTerm, formattedRequest);
+    await ReserveDAO.saveHistory(songName, formattedStart, hapjuTerm, new Date(requestedAt));
     return;
 }
 
 export const createReservation = async({ songName, startTime, hapjuTerm, requestedAt }) => {
-    const startTimeDate = new Date(startTime);
-    const endTimeDate = new Date(startTimeDate.getTime() + hapjuTerm * 60 * 60 * 1000);
+    const startTimeDate = moment(startTime).tz('Asia/Seoul');
+    const endTimeDate = startTimeDate.clone().add(hapjuTerm, 'hours');
     
-    const formattedStart = formatDate(startTimeDate);
-    const formattedEnd = formatDate(endTimeDate);
-    const formattedRequest = formatDate(new Date(requestedAt));
+    const formattedStart = startTimeDate.format('YYYY-MM-DD HH:mm:ss');
+    const formattedEnd = endTimeDate.format('YYYY-MM-DD HH:mm:ss');
+    const formattedRequest = moment(requestedAt).tz('Asia/Seoul').format('YYYY-MM-DD HH:mm:ss');
 
     await ReserveDAO.createReservation(songName, formattedStart, formattedEnd, formattedRequest);
 }

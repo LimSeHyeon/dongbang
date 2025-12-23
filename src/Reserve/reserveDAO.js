@@ -1,6 +1,7 @@
 import { pool } from "../Config/db.connect.js";
 import { BaseError } from "../Config/error.js";
 import { status } from "../Config/response.status.js";
+import moment from 'moment-timezone';
 
 //예약로그 저장
 export const saveHistory = async(songName, startTime, hapjuTerm, requestTime) => {
@@ -40,6 +41,14 @@ export const getReserveByDate = async(connection, startTime, endTime) => {
         return rows;
 }
 
+const insertReservation = async(connection, data) => {
+    console.log("예약 정보 추가");
+    const query = `
+        INSERT INTO reservation (song_name, start_time, end_time, reserved_time, by_admin)
+        VALUES (?, ?, ?, ?, ?);`;
+    return await connection.execute(query, [data.songName, data.startTime, data.endTime, data.requestTime, data.byAdmin]);
+}
+
 //예약 실행
 export const createReservation = async (songName, startTime, endTime, requestTime) => {
     const connection = await pool.getConnection();
@@ -49,8 +58,45 @@ export const createReservation = async (songName, startTime, endTime, requestTim
 
         const existingReserve = await getReserveByDate(connection, startTime, endTime);
         console.log(existingReserve);
+
+        //예약 시간대 분리
+        const slots = [];
+        let startPointer = startTime;
+        const finalTime = endTime;
+
+        for(const reserve of existingReserve) {
+
+            // const bStart = moment.utc(reserve.start_time).format('YYYY-MM-DD HH:mm:ss');
+            // const bEnd = moment.utc(reserve.end_time).format('YYYY-MM-DD HH:mm:ss');
+
+            // ISO 문자열에서 T와 Z를 제거하여 순수한 지역 시간 문자열로 만든 뒤 moment에 넣습니다.
+            const bStart = moment(reserve.start_time.toISOString().replace('T', ' ').replace('Z', '')).format('YYYY-MM-DD HH:mm:ss');
+            const bEnd = moment(reserve.end_time.toISOString().replace('T', ' ').replace('Z', '')).format('YYYY-MM-DD HH:mm:ss');
+
+            if(startPointer < bStart) {
+                slots.push({ start: startPointer, end: bStart });
+            }
+            startPointer = bEnd;
+        }
+        if(startPointer < finalTime) {
+            slots.push({ start: startPointer, end: finalTime });
+        }
+
+        //저장
+        if (slots.length !== 0) {
+            for (const slot of slots) {
+                await insertReservation(connection, {
+                    songName,
+                    startTime: slot.start,
+                    endTime: slot.end,
+                    requestTime: requestTime,
+                    byAdmin: false
+                });
+            }
+        }
+
         await connection.commit();
-        return;
+        return {success: true, reserved: slots};
     } catch (err) {
         await connection.rollback();
         throw err;
