@@ -9,3 +9,5 @@ adminRouter.post('', verifyAdmin, AdminController.getSettingInfo);
 adminRouter.patch('/setting', AdminController.changeSettingInfo);
 
 adminRouter.patch('/password', AdminController.changePassword);
+
+adminRouter.post('/reserve', AdminController.requestReserve);

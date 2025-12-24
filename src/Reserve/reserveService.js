@@ -45,13 +45,22 @@ export const saveHistory = async({ songName, startTime, hapjuTerm, requestedAt }
     return;
 }
 
-export const createReservation = async({ songName, startTime, hapjuTerm, requestedAt }) => {
+export const createReservation = async(req, requestedAt, byAdmin) => {
+    const { songName, startTime, hapjuTerm } = req;
     const startTimeDate = moment(startTime).tz('Asia/Seoul');
+
+    let endTimeDate;
+    
     //최대 예약 시간 초과 방지
-    const setting = await AdminDAO.getSetting();
-    const maxUseTime = setting.max_use_time;
-    const useTime = (hapjuTerm < maxUseTime) ? hapjuTerm : maxUseTime;
-    let endTimeDate = startTimeDate.clone().add(useTime, 'hours');
+    if(!byAdmin) {
+        const setting = await AdminDAO.getSetting();
+        const maxUseTime = setting.max_use_time;
+        const useTime = (hapjuTerm < maxUseTime) ? hapjuTerm : maxUseTime;
+        endTimeDate = startTimeDate.clone().add(useTime, 'hours');
+    }
+    else {//관리자는 최대 예약 시간 무시
+        endTimeDate = startTimeDate.clone().add(hapjuTerm, 'hours');
+    }
     
     //자정 안 넘어가도록
     const endOfDay = startTimeDate.clone().endOf('day');
@@ -63,8 +72,8 @@ export const createReservation = async({ songName, startTime, hapjuTerm, request
     const formattedEnd = endTimeDate.format('YYYY-MM-DD HH:mm:ss');
     const formattedRequest = moment(requestedAt).tz('Asia/Seoul').format('YYYY-MM-DD HH:mm:ss');
 
-    await ReserveDAO.createReservation(songName, formattedStart, formattedEnd, formattedRequest);
-    return;
+    const result = await ReserveDAO.createReservation(songName, formattedStart, formattedEnd, formattedRequest, byAdmin);
+    return result;
 }
 
 export const cancelReserve = async(reservationId) => {

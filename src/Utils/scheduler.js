@@ -22,9 +22,10 @@ export const syncReservationsToDB = async () => {
                 });
                 await redisClient.del(key);
                 //실제 예약 실행
+                const byAdmin = false;
                 await ReserveService.createReservation({ 
                     songName, startTime, hapjuTerm, requestedAt 
-                });
+                }, requestedAt, byAdmin);
                 console.log(`성공: ${songName} (${startTime})`);
             } catch (err) {
                 console.error(`실패 (${songName}):`, err.message);

@@ -50,7 +50,7 @@ const insertReservation = async(connection, data) => {
 }
 
 //예약 실행
-export const createReservation = async (songName, startTime, endTime, requestTime) => {
+export const createReservation = async (songName, startTime, endTime, requestTime, byAdmin) => {
     const connection = await pool.getConnection();
 
     try {
@@ -90,13 +90,13 @@ export const createReservation = async (songName, startTime, endTime, requestTim
                     startTime: slot.start,
                     endTime: slot.end,
                     requestTime: requestTime,
-                    byAdmin: false
+                    byAdmin: byAdmin
                 });
             }
         }
 
         await connection.commit();
-        return {success: true, reserved: slots};
+        return {reserved: slots};
     } catch (err) {
         await connection.rollback();
         throw err;
