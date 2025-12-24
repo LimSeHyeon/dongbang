@@ -14,7 +14,7 @@ export const saveRequest = async(requestInfo) => {
         songName,
         startTime,
         hapjuTerm,
-        requestedAt: new Date().toISOString()
+        requestedAt: moment(new Date()).tz('Asia/Seoul').format('YYYY-MM-DD HH:mm:ss')
     };
 
     console.log(reservationInfo);
@@ -23,11 +23,7 @@ export const saveRequest = async(requestInfo) => {
         await redisClient.lPush('reserveQueue', JSON.stringify(reservationInfo), {
             EX: 3600 
         });
-        return {
-            success: true,
-            requestId,
-            data: reservationInfo
-        };
+        return reservationInfo;
     } catch (error) {
         console.error('Redis 저장 실패:', error);
         throw new BaseError({

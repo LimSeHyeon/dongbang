@@ -69,7 +69,7 @@ export const selectSevenDaysHistory = async() => {
     const query = `
         SELECT * FROM reserve_history 
         WHERE request_time >= DATE_SUB(NOW(), INTERVAL 7 DAY)
-        ORDER BY start_time DESC;
+        ORDER BY request_time DESC;
     `;
     //로그 요약 정보
     const summaryQuery = `
