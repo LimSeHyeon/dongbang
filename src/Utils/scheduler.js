@@ -6,12 +6,9 @@ import * as ReserveService from '../Reserve/reserveService.js';
 export const syncReservationsToDB = async () => {
     console.log("예약 처리 시작");
     try {
-        const keys = await redisClient.keys('booking_req:*');
-        if (keys.length === 0) return;
-
-        for (const key of keys) {
-            const data = await redisClient.get(key);
-            if (!data) continue;
+        while(true) {
+            const data = await redisClient.rPop('reserveQueue');
+            if(!data) break;
 
             const { songName, startTime, hapjuTerm, requestedAt } = JSON.parse(data);
 
@@ -20,7 +17,7 @@ export const syncReservationsToDB = async () => {
                 await ReserveService.saveHistory({ 
                     songName, startTime, hapjuTerm, requestedAt 
                 });
-                await redisClient.del(key);
+
                 //실제 예약 실행
                 const byAdmin = false;
                 await ReserveService.createReservation({ 

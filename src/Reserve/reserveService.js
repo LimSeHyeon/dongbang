@@ -1,4 +1,3 @@
-import { v4 as uuidv4 } from 'uuid';
 import { BaseError } from "../Config/error.js";
 import moment from 'moment-timezone';
 import { status } from "../Config/response.status.js";
@@ -7,9 +6,9 @@ import * as ReserveDAO from './reserveDAO.js';
 import * as AdminDAO from '../Admin/adminDAO.js';
 import { formatDate } from '../Utils/dateConverter.js';
 
+//예약정보 Redis에 push
 export const saveRequest = async(requestInfo) => {
     const { songName, startTime, hapjuTerm } = requestInfo;
-    const requestId = `booking_req:${uuidv4()}`;
 
     const reservationInfo = {
         songName,
@@ -21,7 +20,7 @@ export const saveRequest = async(requestInfo) => {
     console.log(reservationInfo);
 
     try {
-        await redisClient.set(requestId, JSON.stringify(reservationInfo), {
+        await redisClient.lPush('reserveQueue', JSON.stringify(reservationInfo), {
             EX: 3600 
         });
         return {
