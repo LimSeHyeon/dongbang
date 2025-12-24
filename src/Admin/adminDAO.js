@@ -71,6 +71,20 @@ export const selectSevenDaysHistory = async() => {
         WHERE request_time >= DATE_SUB(NOW(), INTERVAL 7 DAY)
         ORDER BY start_time DESC;
     `;
+    //로그 요약 정보
+    const summaryQuery = `
+        SELECT 
+            SUM(hapju_term) as totalDuration,
+            COUNT(*) as totalCount,
+            MIN(start_time) as startDate,
+            MAX(start_time) as endDate
+        FROM reserve_history 
+        WHERE start_time >= DATE_SUB(NOW(), INTERVAL 7 DAY);
+    `;
     const [result] = await pool.query(query);
-    return result;
+    const [summary] = await pool.query(summaryQuery);
+    return {
+        result : result,
+        summary : summary[0]
+    };
 }

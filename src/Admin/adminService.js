@@ -26,6 +26,6 @@ export const updatePassword = async(req) => {
 }
 
 export const getWeeklyHistory = async() => {
-    const result = await AdminDAO.selectSevenDaysHistory();
-    return AdminDTO.historyDTO(result);
+    const { result, summary } = await AdminDAO.selectSevenDaysHistory();
+    return AdminDTO.historyDTO(result, summary);
 }
