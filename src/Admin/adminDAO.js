@@ -65,3 +65,12 @@ export const updateSetting = async (newSetting) => {
     }
 }
 
+export const selectSevenDaysHistory = async() => {
+    const query = `
+        SELECT * FROM reserve_history 
+        WHERE request_time >= DATE_SUB(NOW(), INTERVAL 7 DAY)
+        ORDER BY start_time DESC;
+    `;
+    const [result] = await pool.query(query);
+    return result;
+}

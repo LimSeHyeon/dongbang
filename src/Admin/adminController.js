@@ -21,3 +21,7 @@ export const requestReserve = async (req, res, next) => {
     const byAdmin = true;
     res.send(response(status.SUCCESS, await ReserveService.createReservation(req.body, requestedAt, byAdmin)));
 }
+
+export const getHistory = async (req, res, next) => {
+    res.send(response(status.SUCCESS, await AdminService.getWeeklyHistory()));
+}
