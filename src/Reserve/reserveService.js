@@ -4,6 +4,7 @@ import { status } from "../Config/response.status.js";
 import redisClient from '../Config/redis.js';
 import * as ReserveDAO from './reserveDAO.js';
 import * as AdminDAO from '../Admin/adminDAO.js';
+import * as ReserveDTO from './reserveDTO.js';
 import { formatDate } from '../Utils/dateConverter.js';
 
 //예약정보 Redis에 push
@@ -75,4 +76,15 @@ export const cancelReserve = async(reservationId) => {
     const isDeleted = await ReserveDAO.deleteReserve(reservationId);
     if(!isDeleted) throw new BaseError(status.DATA_NOT_DELETED);
     return {"deleted": reservationId};
+}
+
+export const getWeeklyReserve = async(startDate) => {
+    const startOfWeek = moment(startDate).tz('Asia/Seoul').startOf('day');
+    const endOfWeek = startOfWeek.clone().add(6, 'days').endOf('day');
+
+    const formattedStart = startOfWeek.format('YYYY-MM-DD HH:mm:ss');
+    const formattedEnd = endOfWeek.format('YYYY-MM-DD HH:mm:ss');
+
+    const result = await ReserveDAO.selectReserveByPeriod(formattedStart, formattedEnd);
+    return ReserveDTO.reserveListDTO(result, formattedStart, formattedEnd);
 }

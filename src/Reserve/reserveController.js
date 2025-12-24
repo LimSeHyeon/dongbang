@@ -10,3 +10,7 @@ export const requestReserveInfo = async (req, res, next) => {
 export const cancelReserve = async (req, res, next) => {
     res.send(response(status.SUCCESS, await ReserveService.cancelReserve(req.query.reservationId)));
 }
+
+export const getReserve = async (req, res, next) => {
+    res.send(response(status.SUCCESS, await ReserveService.getWeeklyReserve(req.query.date)))
+}

@@ -7,3 +7,5 @@ export const reserveRouter = express.Router();
 reserveRouter.post('', checkTime, ReserveController.requestReserveInfo);
 
 reserveRouter.delete('', ReserveController.cancelReserve);
+
+reserveRouter.get('/week', ReserveController.getReserve);

@@ -1,3 +1,4 @@
+import { start } from "repl";
 import { pool } from "../Config/db.connect.js";
 import { BaseError } from "../Config/error.js";
 import { status } from "../Config/response.status.js";
@@ -112,6 +113,26 @@ export const deleteReserve = async(reservationId) => {
         return result.affectedRows>0;
     }
     catch (err) {
+        console.error(err);
+        throw new BaseError({
+            ...status.DB_ERROR,
+            message: err.message
+        });
+    }
+}
+
+//주별 예약 조회
+export const selectReserveByPeriod = async(startDate, endDate) => {
+    const query = `
+        SELECT * FROM reservation 
+        WHERE start_time >= ? AND start_time <= ?
+        ORDER BY start_time ASC;
+    `;
+
+    try {
+        const [result] = await pool.query(query, [startDate, endDate]);
+        return result;
+    } catch (err) {
         console.error(err);
         throw new BaseError({
             ...status.DB_ERROR,
