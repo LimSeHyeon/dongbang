@@ -2,14 +2,17 @@ import { BaseError } from "../Config/error.js";
 import { status } from "../Config/response.status.js";
 
 import * as AdminDAO from './adminDAO.js';
+import * as AdminDTO from "./adminDTO.js";
 
 export const getSetting = async() => {
-    return AdminDAO.getSetting();
+    const result = await AdminDAO.getSetting();
+    return AdminDTO.settingInfoDTO(result);
 }
 
 export const updateSetting = async(newSetting) => {
     await AdminDAO.updateSetting(newSetting);
-    return await AdminDAO.getSetting();
+    const result = await AdminDAO.getSetting();
+    return AdminDTO.settingInfoDTO(result);
 }
 
 export const updatePassword = async(req) => {
@@ -20,4 +23,9 @@ export const updatePassword = async(req) => {
     })
     await AdminDAO.updatePassword(req.newPassword);
     return;
+}
+
+export const getWeeklyHistory = async() => {
+    const { result, summary } = await AdminDAO.selectSevenDaysHistory();
+    return AdminDTO.historyDTO(result, summary);
 }

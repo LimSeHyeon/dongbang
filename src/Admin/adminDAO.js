@@ -2,8 +2,6 @@ import { pool } from "../Config/db.connect.js";
 import { BaseError } from "../Config/error.js";
 import { status } from "../Config/response.status.js";
 
-import * as AdminDTO from "./adminDTO.js";
-
 
 //비밀번호 조회(관리자 확인용)
 export const getPassword = async() => {
@@ -41,7 +39,7 @@ export const getSetting = async () => {
     try {
         const [result] = await pool.query(query);
         console.log("result : ", result[0]);
-        return AdminDTO.settingInfoDTO(result[0]);
+        return result[0];
     } catch (err) {
         console.error(err);
         throw new BaseError({
@@ -56,7 +54,7 @@ export const updateSetting = async (newSetting) => {
     const query = "UPDATE settings SET open_weekday=?, open_time=?, max_use_time = ? WHERE settings_id = ?";
     console.log("newSetting ", newSetting)
     try {
-        const [result] = await pool.query(query, [newSetting.open_weekday, newSetting.open_time, newSetting.max_use_time, 1]);
+        const [result] = await pool.query(query, [newSetting.openWeekday, newSetting.openTime, newSetting.maxUseTime, 1]);
         return;
     } catch (err) {
         console.error(err);
@@ -67,3 +65,26 @@ export const updateSetting = async (newSetting) => {
     }
 }
 
+export const selectSevenDaysHistory = async() => {
+    const query = `
+        SELECT * FROM reserve_history 
+        WHERE request_time >= DATE_SUB(NOW(), INTERVAL 7 DAY)
+        ORDER BY request_time DESC, history_id DESC;
+    `;
+    //로그 요약 정보
+    const summaryQuery = `
+        SELECT 
+            SUM(hapju_term) as totalDuration,
+            COUNT(*) as totalCount,
+            MIN(start_time) as startDate,
+            MAX(start_time) as endDate
+        FROM reserve_history 
+        WHERE start_time >= DATE_SUB(NOW(), INTERVAL 7 DAY);
+    `;
+    const [result] = await pool.query(query);
+    const [summary] = await pool.query(summaryQuery);
+    return {
+        result : result,
+        summary : summary[0]
+    };
+}
