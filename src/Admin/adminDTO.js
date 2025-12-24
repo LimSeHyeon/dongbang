@@ -25,7 +25,7 @@ export const historyDTO = (data, summary) => {
         data: data.map(item => ({
         "historyId" : item.history_id,
         "songName" : item.song_name,
-        "startTime" : moment(item.start_time).format('YYYY-MM-DD HH:mm:ss'),
+        "startTime" : moment(item.start_time.toISOString().replace('T', ' ').replace('Z', '')).format('YYYY-MM-DD HH:mm:ss'),
         "requestTime" : moment(item.request_time).format('YYYY-MM-DD HH:mm:ss'),
         "hapjuTerm" : item.hapju_term
         }))

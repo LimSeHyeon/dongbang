@@ -21,7 +21,7 @@ export const syncReservationsToDB = async () => {
                 //실제 예약 실행
                 const byAdmin = false;
                 await ReserveService.createReservation({ 
-                    songName, startTime, hapjuTerm, requestedAt 
+                    songName, startTime, hapjuTerm 
                 }, requestedAt, byAdmin);
                 console.log(`성공: ${songName} (${startTime})`);
             } catch (err) {

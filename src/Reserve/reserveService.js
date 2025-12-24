@@ -35,9 +35,9 @@ export const saveRequest = async(requestInfo) => {
 }
 
 export const saveHistory = async({ songName, startTime, hapjuTerm, requestedAt }) => {
-    const startTimeDate = new Date(startTime);
-    const formattedStart = formatDate(startTimeDate);
-    await ReserveDAO.saveHistory(songName, formattedStart, hapjuTerm, new Date(requestedAt));
+    const formattedStart =moment(startTime).tz('Asia/Seoul').format('YYYY-MM-DD HH:mm:ss');
+    const formattedRequest = moment(requestedAt).tz('Asia/Seoul').format('YYYY-MM-DD HH:mm:ss');
+    await ReserveDAO.saveHistory(songName, formattedStart, hapjuTerm, formattedRequest);
     return;
 }
 
