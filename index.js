@@ -6,6 +6,8 @@ import { adminRouter } from './src/Admin/adminRouter.js';
 import { reserveRouter } from './src/Reserve/reserveRouter.js';
 import { syncReservationsToDB } from './src/Utils/scheduler.js';
 
+dotenv.config();
+
 const app = express()
 const port = process.env.PORT;
 
