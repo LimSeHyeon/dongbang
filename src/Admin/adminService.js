@@ -1,5 +1,5 @@
-import { BaseError } from "../Config/error.js";
-import { status } from "../Config/response.status.js";
+import { BaseError } from "../config/error.js";
+import { status } from "../config/response.status.js";
 
 import * as AdminDAO from './adminDAO.js';
 import * as AdminDTO from "./adminDTO.js";
