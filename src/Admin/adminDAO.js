@@ -65,6 +65,7 @@ export const updateSetting = async (newSetting) => {
     }
 }
 
+//히스토리 조회
 export const selectSevenDaysHistory = async() => {
     const query = `
         SELECT * FROM reserve_history 
@@ -76,10 +77,10 @@ export const selectSevenDaysHistory = async() => {
         SELECT 
             SUM(hapju_term) as totalDuration,
             COUNT(*) as totalCount,
-            MIN(start_time) as startDate,
-            MAX(start_time) as endDate
+            MIN(request_time) as startDate,
+            MAX(request_time) as endDate
         FROM reserve_history 
-        WHERE start_time >= DATE_SUB(NOW(), INTERVAL 7 DAY);
+        WHERE request_time >= DATE_SUB(NOW(), INTERVAL 7 DAY);
     `;
     const [result] = await pool.query(query);
     const [summary] = await pool.query(summaryQuery);

@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html class="light" lang="ko">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>관리자 로그인</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet" />
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script src="js/tailwind.config.js"></script>
+    <link rel="stylesheet" href="css/style.css" />
+</head>
+
+<body class="font-display bg-background-light dark:bg-background-dark overflow-hidden">
+    <div class="relative w-full h-screen overflow-hidden flex flex-col">
+        <header class="flex items-center justify-between px-6 py-4 bg-white dark:bg-[#111418] border-b border-slate-200 dark:border-slate-800 shrink-0">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
+                    <span class="material-symbols-outlined">calendar_month</span>
+                </div>
+                <h1 class="text-xl font-bold text-[#111418] dark:text-white tracking-tight">동아리방 예약</h1>
+            </div>
+            <div class="hidden md:flex items-center gap-6">
+                <div class="h-9 w-24 rounded bg-slate-100 dark:bg-slate-800"></div>
+                <div class="h-9 w-24 rounded bg-slate-100 dark:bg-slate-800"></div>
+                <div class="h-10 w-10 rounded-full bg-slate-200 dark:bg-slate-700"></div>
+            </div>
+        </header>
+        <main class="flex-1 relative">
+            <div class="absolute inset-0 z-0">
+                <img alt="Blurred view of a modern office club room with glass walls" class="w-full h-full object-cover" data-alt="Blurred view of a modern office club room with glass walls" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDND3I-_Z7sNTL1AI7x1lzkXdem9ftzcziWbTkYU4-LM_lzoMDDQjxPHsRt0g1XqeqUGW2fF6b4fqW98WOfwVt92oaPDXn7tlSefogdzMOw_kCCA7llVphnYPdyhdRmflMosu59HqSLeCf7rhKCUKZfYrcd5fKE6oKbg7UVPJbkl1nA6KT6Wsnsp8duMUnm6hnD9JkDEcEOHvXFJBeh5Hw6G2COasnZNxY5_vMImwnpm9Vu70HN6Sf2npGwVd-qUKCmSZ2AhFDo6xY" />
+            </div>
+            <div class="absolute inset-0 z-10 bg-[#111418]/60 backdrop-blur-sm"></div>
+            <div class="relative z-20 h-full p-8 hidden md:block">
+                <div class="grid grid-cols-4 gap-6 h-full opacity-10">
+                    <div class="col-span-1 bg-white rounded-xl h-full"></div>
+                    <div class="col-span-3 bg-white rounded-xl h-full"></div>
+                </div>
+            </div>
+        </main>
+        <div class="absolute inset-0 z-50 flex items-center justify-center p-4">
+            <div class="group/modal relative w-full max-w-[440px] flex flex-col bg-white dark:bg-[#111418] rounded-xl shadow-2xl ring-1 ring-black/5 dark:ring-white/10">
+                <button aria-label="Close modal" class="absolute top-4 right-4 z-10 p-2 text-slate-400 hover:text-[#111418] dark:hover:text-white transition-colors rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-primary/50">
+                    <span class="material-symbols-outlined text-[24px]">close</span>
+                </button>
+                <div class="flex flex-col p-8 pt-10">
+                    <div class="flex justify-center mb-6">
+                        <div class="h-14 w-14 rounded-full bg-primary/10 flex items-center justify-center">
+                            <span class="material-symbols-outlined text-primary text-[32px]">admin_panel_settings</span>
+                        </div>
+                    </div>
+                    <div class="text-center mb-8">
+                        <h2 class="text-[#111418] dark:text-white tracking-tight text-[26px] font-bold leading-tight mb-2">관리자 로그인</h2>
+                        <p class="text-slate-500 dark:text-slate-400 text-base font-normal leading-relaxed">
+                            관리자 비밀번호를 입력하세요.
+                        </p>
+                    </div>
+                    <div class="flex flex-col gap-6">
+                        <label class="flex flex-col gap-2">
+                            <span class="text-[#111418] dark:text-white text-sm font-semibold leading-normal">비밀번호</span>
+                            <div class="relative flex w-full">
+                                <input class="flex w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-[#19222b] h-12 px-4 pr-12 text-[#111418] dark:text-white text-base placeholder:text-slate-400 focus:border-primary focus:ring-1 focus:ring-primary focus:outline-none transition-all" placeholder="비밀번호 입력" type="password" />
+                                <button class="absolute right-0 top-0 h-full w-12 flex items-center justify-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors focus:outline-none" type="button">
+                                    <span class="material-symbols-outlined text-[20px]">visibility_off</span>
+                                </button>
+                            </div>
+                        </label>
+                        <button class="flex w-full cursor-pointer items-center justify-center overflow-hidden rounded-lg h-12 px-5 bg-primary hover:bg-[#0f6bca] active:bg-[#0c59a8] text-white text-base font-bold leading-normal tracking-[0.015em] transition-all shadow-md shadow-primary/20">
+                            <span class="truncate">로그인</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>
