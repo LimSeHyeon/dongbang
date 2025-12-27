@@ -1,7 +1,6 @@
-import { start } from "repl";
-import { pool } from "../Config/db.connect.js";
-import { BaseError } from "../Config/error.js";
-import { status } from "../Config/response.status.js";
+import { pool } from "../config/db.connect.js";
+import { BaseError } from "../config/error.js";
+import { status } from "../config/response.status.js";
 import moment from 'moment-timezone';
 
 //예약로그 저장

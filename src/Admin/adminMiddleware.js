@@ -1,8 +1,8 @@
-import { response } from "../Config/response.js";
-import { status } from "../Config/response.status.js";
+import { response } from "../config/response.js";
+import { status } from "../config/response.status.js";
 
 import * as AdminDAO from './adminDAO.js';
-import { BaseError } from '../Config/error.js';
+import { BaseError } from '../config/error.js';
 
 export const verifyAdmin = async (req, res, next) => {
     const result = await AdminDAO.getPassword();

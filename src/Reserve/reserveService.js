@@ -1,7 +1,7 @@
-import { BaseError } from "../Config/error.js";
+import { BaseError } from "../config/error.js";
 import moment from 'moment-timezone';
-import { status } from "../Config/response.status.js";
-import redisClient from '../Config/redis.js';
+import { status } from "../config/response.status.js";
+import redisClient from '../config/redis.js';
 import * as ReserveDAO from './reserveDAO.js';
 import * as AdminDAO from '../Admin/adminDAO.js';
 import * as ReserveDTO from './reserveDTO.js';

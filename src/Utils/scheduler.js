@@ -1,6 +1,6 @@
 import cron from 'node-cron';
 
-import redisClient from '../Config/redis.js';
+import redisClient from '../config/redis.js';
 import * as ReserveService from '../Reserve/reserveService.js';
 
 export const syncReservationsToDB = async () => {
