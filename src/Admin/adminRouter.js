@@ -13,3 +13,5 @@ adminRouter.patch('/password', AdminController.changePassword);
 adminRouter.post('/reserve', AdminController.requestReserve);
 
 adminRouter.get('/history', AdminController.getHistory);
+
+adminRouter.get('/setting', AdminController.getSettingInfo);

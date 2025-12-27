@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html class="light" lang="ko">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>동아리방 예약 시스템</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet" />
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script src="js/tailwind.config.js"></script>
+    <link rel="stylesheet" href="css/style.css" />
+</head>
+
+<body class="font-display bg-background-light dark:bg-background-dark text-slate-900 dark:text-white h-screen flex flex-col overflow-hidden">
+<header class="flex items-center justify-between whitespace-nowrap border-b border-solid border-b-[#e5e7eb] dark:border-b-[#2a3441] bg-white dark:bg-[#1a2632] px-6 py-3 shrink-0 z-20">
+<div class="flex items-center gap-4 text-[#111418] dark:text-white">
+<div class="size-8 bg-primary/10 rounded-lg flex items-center justify-center text-primary">
+<span class="material-symbols-outlined">music_note</span>
+</div>
+<h2 class="text-[#111418] dark:text-white text-lg font-bold leading-tight tracking-[-0.015em]">동아리방 예약 시스템</h2>
+</div>
+<button id="admin-btn" class="flex cursor-pointer items-center justify-center overflow-hidden rounded-lg h-9 px-4 bg-primary/10 hover:bg-primary/20 text-primary text-sm font-bold leading-normal transition-colors">
+<span class="material-symbols-outlined text-[18px] mr-2">admin_panel_settings</span>
+<span class="truncate">관리자</span>
+</button>
+</header>
+<!-- Main Content Area -->
+<main class="flex flex-1 overflow-hidden">
+<!-- Left Panel: Reservation Form -->
+<aside class="w-full max-w-[400px] border-r border-[#e5e7eb] dark:border-[#2a3441] bg-white dark:bg-[#1a2632] flex flex-col overflow-y-auto shrink-0 z-10 shadow-lg">
+<div class="p-6 space-y-8">
+<div>
+<h2 class="text-xl font-bold mb-1">예약 신청</h2>
+</div>
+<!-- Form -->
+<div class="space-y-6">
+<!-- Song Name -->
+<label class="flex flex-col gap-2">
+<span class="text-sm font-semibold text-slate-700 dark:text-slate-300">곡명</span>
+<input class="w-full rounded-lg border border-[#d1d5db] dark:border-[#4b5563] bg-white dark:bg-[#232d38] px-4 py-2.5 text-sm focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-slate-400 dark:placeholder:text-slate-500" placeholder="예: 아틀란티스 소녀" type="text"/>
+</label>
+<!-- Day Selection -->
+<div class="flex flex-col gap-2">
+<span class="text-sm font-semibold text-slate-700 dark:text-slate-300">요일 선택</span>
+                            <div id="day-selector" class="grid grid-cols-4 gap-2">
+                                <button type="button" data-day="mon" data-active="true" class="h-9 rounded-lg bg-primary text-white text-xs font-semibold shadow-sm transition-transform active:scale-95">월</button>
+                                <button type="button" data-day="tue" class="h-9 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 text-xs font-medium transition-colors">화</button>
+                                <button type="button" data-day="wed" class="h-9 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 text-xs font-medium transition-colors">수</button>
+                                <button type="button" data-day="thu" class="h-9 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 text-xs font-medium transition-colors">목</button>
+                                <button type="button" data-day="fri" class="h-9 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 text-xs font-medium transition-colors">금</button>
+                                <button type="button" data-day="sat" class="h-9 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 text-xs font-medium transition-colors">토</button>
+                                <button type="button" data-day="sun" class="h-9 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 text-xs font-medium transition-colors">일</button>
+                            </div>
+</div>
+<!-- Time Selection -->
+<div class="flex flex-col gap-2">
+<span class="text-sm font-semibold text-slate-700 dark:text-slate-300">시작 시간</span>
+<div class="flex gap-3">
+<div class="relative w-24">
+<select class="w-full appearance-none bg-none rounded-lg border border-[#d1d5db] dark:border-[#4b5563] bg-white dark:bg-[#232d38] px-3 py-2.5 text-sm focus:border-primary focus:ring-1 focus:ring-primary outline-none">
+<option>08</option>
+<option>09</option>
+<option>10</option>
+<option>11</option>
+<option>12</option>
+<option>13</option>
+<option>14</option>
+<option>15</option>
+<option>16</option>
+<option>17</option>
+<option>18</option>
+<option>19</option>
+<option>20</option>
+<option>21</option>
+<option>22</option>
+<option>23</option>
+</select>
+<span class="material-symbols-outlined absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 text-lg pointer-events-none">expand_more</span>
+</div>
+                                    <div id="minute-selector" class="flex flex-1 bg-slate-100 dark:bg-slate-800 p-1 rounded-lg">
+                                        <button type="button" data-minute="00" class="flex-1 rounded bg-white dark:bg-[#232d38] shadow-sm text-xs font-semibold text-primary py-1.5 transition-all">:00</button>
+                                        <button type="button" data-minute="30" class="flex-1 rounded text-xs font-medium text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 py-1.5 transition-all">:30</button>
+                                    </div>
+</div>
+</div>
+<!-- Duration Selection -->
+<div class="flex flex-col gap-2">
+<span class="text-sm font-semibold text-slate-700 dark:text-slate-300">사용 시간</span>
+<div id="duration-selector" class="flex flex-wrap gap-2">
+                                <!-- Dynamically populated by JS based on settings -->
+</div>
+</div>
+<div class="pt-4 border-t border-dashed border-slate-200 dark:border-slate-700">
+<button id="reserve-submit-btn" class="w-full bg-primary hover:bg-primary/90 text-white font-bold py-3.5 px-4 rounded-xl shadow-md transition-transform active:scale-[0.98] flex items-center justify-center gap-2">
+<span>예약 신청</span>
+<span class="material-symbols-outlined text-[20px]">arrow_forward</span>
+</button>
+</div>
+</div>
+</div>
+<div class="mt-auto p-6 bg-slate-50 dark:bg-[#15202b] border-t border-[#e5e7eb] dark:border-[#2a3441]">
+                <div class="flex items-start gap-3">
+                    <span class="material-symbols-outlined text-slate-400 mt-0.5">info</span>
+                    <div class="flex flex-col gap-1">
+                        <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
+                            문의사항은 임원진에게 연락 바랍니다.
+                        </p>
+                        <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
+                            마음의 편지 : dlatpgus1205@naver.com
+                        </p>
+                    </div>
+                </div>
+</div>
+</aside>
+<!-- Right Panel: Weekly Schedule -->
+<section id="reservation-schedule" class="flex-1 flex flex-col bg-slate-50 dark:bg-[#0d1218] min-w-0">
+    <!-- Schedule will be rendered here by ReservationSchedule.js -->
+</section>
+</main>
+    <script src="js/ReservationSchedule.js"></script>
+
+    <script src="js/app.js"></script>
+</body></html>

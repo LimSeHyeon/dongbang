@@ -12,12 +12,11 @@ export const checkTime = async (req, res, next) => {
     //이번 주 예약인지 확인
     const now = new Date();
     const currentDay = now.getDay();
-    // const currentDay = 4;
     const daysUntilSunday = currentDay === 0 ? 0 : 7 - currentDay;
     const thisSunday = new Date(now);
     thisSunday.setDate(now.getDate() + daysUntilSunday);
     thisSunday.setHours(23, 59, 59, 999);
-    
+    console.log("이번 주 마지막 시간 표시 : ", thisSunday);
     if (targetDate <= thisSunday) {
         return next();
     }
@@ -25,9 +24,14 @@ export const checkTime = async (req, res, next) => {
     //다음 주 예약
     //예약 기준일시보다 나중이면 바로 예약 가능
     const settingResult = await AdminDAO.getSetting();
-    const isAfterOpenDay = currentDay > settingResult.open_weekday || (currentDay === 0);
-    const isSameDayAfterTime = (currentDay === settingResult.open_weekday && now.getHours() >= settingResult.open_time);
 
+    const currentDayVal = currentDay === 0 ? 7 : currentDay;
+    const openDayVal = settingResult.open_weekday === 0 ? 7 : settingResult.open_weekday;
+
+    const isAfterOpenDay = currentDayVal > openDayVal;
+    const isSameDayAfterTime = (currentDay === openDayVal && now.getHours() >= settingResult.open_time);
+    console.log("isAfterOpenDay : ", isAfterOpenDay);
+    console.log("isSameDayAfterTime : ", isSameDayAfterTime);
     if (isAfterOpenDay || isSameDayAfterTime) {
         return next();
     }

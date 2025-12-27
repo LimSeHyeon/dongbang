@@ -14,6 +14,10 @@ app.use(cors()); // cors 오류 방지
 app.use(express.static('public')); 
 app.use(express.json()); // body에 필요
 
+app.get('/', (req, res) => {
+    res.sendFile(path.resolve('public', 'index.html'));
+});
+
 // router setting
 app.use('/admin', adminRouter);
 app.use('/reserve', reserveRouter);

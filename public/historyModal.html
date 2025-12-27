@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html class="light" lang="ko">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Admin Control Panel</title>
+    <link href="https://fonts.googleapis.com" rel="preconnect" />
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet" />
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script src="js/tailwind.config.js"></script>
+    <link rel="stylesheet" href="css/style.css" />
+</head>
+
+<body class="font-display bg-background-light dark:bg-background-dark text-slate-900 dark:text-white min-h-screen flex overflow-hidden">
+    <aside class="w-full md:w-[420px] lg:w-[480px] bg-white dark:bg-[#1a2632] h-screen flex flex-col border-r border-slate-200 dark:border-slate-800 overflow-y-auto shadow-xl relative z-20">
+        <div class="px-8 pt-8 pb-6 sticky top-0 bg-white/95 dark:bg-[#1a2632]/95 backdrop-blur-sm z-10 border-b border-transparent">
+            <div class="flex items-center gap-3 mb-2">
+                <div class="flex items-center justify-center w-10 h-10 rounded-lg bg-primary/10 text-primary">
+                    <span class="material-symbols-outlined text-2xl">admin_panel_settings</span>
+                </div>
+                <h2 class="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">Admin Control Panel</h2>
+            </div>
+            <p class="text-slate-500 dark:text-slate-400 text-sm pl-[52px]">Manage settings, security, and logs for club room reservations.</p>
+        </div>
+        <div class="flex-1 px-8 pb-12 space-y-10">
+            <div class="space-y-6 animate-fade-in">
+                <div class="flex items-center gap-2 pb-2 border-b border-slate-100 dark:border-slate-700">
+                    <span class="material-symbols-outlined text-primary text-xl">tune</span>
+                    <h3 class="text-lg font-bold leading-tight">Reservation Settings</h3>
+                </div>
+                <div class="space-y-5">
+                    <div class="flex flex-col gap-2">
+                        <label class="text-sm font-medium text-slate-700 dark:text-slate-300">Reservation Open Day</label>
+                        <div class="relative">
+                            <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 material-symbols-outlined">calendar_today</span>
+                            <input class="w-full h-12 pl-12 pr-4 rounded-lg border border-slate-200 bg-slate-50 dark:bg-slate-800 dark:border-slate-700 text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all text-sm font-medium" type="text" value="14 days prior" />
+                        </div>
+                        <p class="text-xs text-slate-500">How many days in advance can a user book?</p>
+                    </div>
+                    <div class="flex flex-col gap-2">
+                        <label class="text-sm font-medium text-slate-700 dark:text-slate-300">Reservation Open Time</label>
+                        <div class="relative">
+                            <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 material-symbols-outlined">schedule</span>
+                            <input class="w-full h-12 pl-12 pr-4 rounded-lg border border-slate-200 bg-slate-50 dark:bg-slate-800 dark:border-slate-700 text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all text-sm font-medium" type="time" value="09:00" />
+                        </div>
+                    </div>
+                    <div class="flex flex-col gap-2">
+                        <label class="text-sm font-medium text-slate-700 dark:text-slate-300">Maximum Reservation Time</label>
+                        <div class="relative">
+                            <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 material-symbols-outlined">hourglass_top</span>
+                            <input class="w-full h-12 pl-12 pr-4 rounded-lg border border-slate-200 bg-slate-50 dark:bg-slate-800 dark:border-slate-700 text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all text-sm font-medium" type="text" value="3 hours" />
+                        </div>
+                    </div>
+                    <button class="w-full h-12 bg-primary hover:bg-blue-600 text-white font-medium rounded-lg shadow-sm hover:shadow transition-all flex items-center justify-center gap-2">
+                        <span class="material-symbols-outlined text-xl">save</span>
+                        Save Configuration
+                    </button>
+                </div>
+            </div>
+            <div class="space-y-6">
+                <div class="flex items-center gap-2 pb-2 border-b border-slate-100 dark:border-slate-700">
+                    <span class="material-symbols-outlined text-primary text-xl">lock_reset</span>
+                    <h3 class="text-lg font-bold leading-tight">Change Admin Password</h3>
+                </div>
+                <div class="space-y-4">
+                    <div class="flex flex-col gap-2">
+                        <label class="text-sm font-medium text-slate-700 dark:text-slate-300">Current Password</label>
+                        <div class="relative group">
+                            <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-primary transition-colors material-symbols-outlined">key</span>
+                            <input class="w-full h-12 pl-12 pr-12 rounded-lg border border-slate-200 bg-white dark:bg-slate-800 dark:border-slate-700 text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all text-sm" placeholder="••••••••" type="password" />
+                            <button class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 focus:outline-none">
+                                <span class="material-symbols-outlined text-xl">visibility_off</span>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="flex flex-col gap-2">
+                        <label class="text-sm font-medium text-slate-700 dark:text-slate-300">New Password</label>
+                        <div class="relative group">
+                            <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-primary transition-colors material-symbols-outlined">lock</span>
+                            <input class="w-full h-12 pl-12 pr-12 rounded-lg border border-slate-200 bg-white dark:bg-slate-800 dark:border-slate-700 text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all text-sm" placeholder="New strong password" type="password" />
+                        </div>
+                    </div>
+                    <div class="flex flex-col gap-2">
+                        <label class="text-sm font-medium text-slate-700 dark:text-slate-300">Confirm New Password</label>
+                        <div class="relative group">
+                            <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-primary transition-colors material-symbols-outlined">lock_clock</span>
+                            <input class="w-full h-12 pl-12 pr-12 rounded-lg border border-slate-200 bg-white dark:bg-slate-800 dark:border-slate-700 text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all text-sm" placeholder="Repeat new password" type="password" />
+                        </div>
+                    </div>
+                    <button class="w-full h-12 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-900 dark:text-white font-medium rounded-lg transition-all flex items-center justify-center gap-2 mt-2">
+                        <span class="material-symbols-outlined text-xl">update</span>
+                        Update Password
+                    </button>
+                </div>
+            </div>
+            <div class="space-y-6">
+                <div class="flex items-center gap-2 pb-2 border-b border-slate-100 dark:border-slate-700">
+                    <span class="material-symbols-outlined text-primary text-xl">history</span>
+                    <h3 class="text-lg font-bold leading-tight">Reservation History</h3>
+                </div>
+                <div class="bg-primary/5 dark:bg-primary/10 rounded-xl p-5 border border-primary/10 flex flex-col gap-4">
+                    <div class="flex gap-4">
+                        <div class="bg-white dark:bg-slate-800 p-2 rounded-lg h-fit shadow-sm text-primary">
+                            <span class="material-symbols-outlined">receipt_long</span>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold text-sm mb-1">Access Logs</h4>
+                            <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">View all past booking records, cancellations, and administrative overrides.</p>
+                        </div>
+                    </div>
+                    <button class="w-full h-10 text-sm bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 hover:border-primary/50 dark:hover:border-primary/50 text-slate-700 dark:text-slate-200 font-medium rounded-lg transition-all flex items-center justify-center gap-2 hover:text-primary">
+                        View History Log
+                        <span class="material-symbols-outlined text-lg">arrow_forward</span>
+                    </button>
+                </div>
+            </div>
+            <div class="pt-8 text-center border-t border-slate-100 dark:border-slate-800">
+                <p class="text-xs text-slate-400">Club Room Admin v1.0.4</p>
+                <p class="text-xs text-slate-400 mt-1">© 2024 Reservation System</p>
+            </div>
+        </div>
+    </aside>
+    <main class="flex-1 h-screen overflow-hidden hidden md:flex flex-col relative">
+        <header class="h-16 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-[#1a2632] flex items-center justify-between px-8">
+            <h1 class="text-lg font-semibold text-slate-700 dark:text-slate-200">Dashboard Overview</h1>
+            <div class="flex items-center gap-4">
+                <button class="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-500 relative">
+                    <span class="material-symbols-outlined">notifications</span>
+                    <span class="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full"></span>
+                </button>
+                <div class="w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center text-sm font-bold">A</div>
+            </div>
+        </header>
+        <div class="flex-1 p-8 bg-background-light dark:bg-background-dark overflow-y-auto">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+                <div class="bg-white dark:bg-[#1a2632] p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
+                    <div class="flex items-center gap-4">
+                        <div class="p-3 rounded-lg bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400">
+                            <span class="material-symbols-outlined">calendar_month</span>
+                        </div>
+                        <div>
+                            <p class="text-sm text-slate-500 dark:text-slate-400">Active Reservations</p>
+                            <h4 class="text-2xl font-bold">12</h4>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-white dark:bg-[#1a2632] p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
+                    <div class="flex items-center gap-4">
+                        <div class="p-3 rounded-lg bg-emerald-50 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400">
+                            <span class="material-symbols-outlined">check_circle</span>
+                        </div>
+                        <div>
+                            <p class="text-sm text-slate-500 dark:text-slate-400">Completed Today</p>
+                            <h4 class="text-2xl font-bold">4</h4>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-white dark:bg-[#1a2632] p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
+                    <div class="flex items-center gap-4">
+                        <div class="p-3 rounded-lg bg-purple-50 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400">
+                            <span class="material-symbols-outlined">group</span>
+                        </div>
+                        <div>
+                            <p class="text-sm text-slate-500 dark:text-slate-400">Total Users</p>
+                            <h4 class="text-2xl font-bold">148</h4>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-white dark:bg-[#1a2632] rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm p-6 h-[400px] flex items-center justify-center relative overflow-hidden group">
+                <div class="absolute inset-0 bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-800 dark:to-slate-900 opacity-50"></div>
+                <div class="text-center relative z-10">
+                    <span class="material-symbols-outlined text-6xl text-slate-200 dark:text-slate-700 mb-4">calendar_view_week</span>
+                    <p class="text-slate-400 dark:text-slate-500">Weekly Schedule View Component</p>
+                </div>
+                <div class="absolute inset-0 opacity-5" data-alt="Subtle dot grid pattern background" style="background-image: radial-gradient(#64748b 1px, transparent 1px); background-size: 20px 20px;"></div>
+            </div>
+        </div>
+        <div class="absolute inset-0 z-50 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4">
+            <div class="bg-white dark:bg-[#1e2a38] rounded-2xl shadow-2xl w-full max-w-4xl max-h-[85vh] flex flex-col overflow-hidden animate-fade-in border border-slate-200 dark:border-slate-700">
+                <div class="px-6 py-5 border-b border-slate-100 dark:border-slate-700 flex items-center justify-between bg-white dark:bg-[#1e2a38] sticky top-0 z-10">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+                            <span class="material-symbols-outlined">history_edu</span>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-bold text-slate-900 dark:text-white">예약 히스토리</h3>
+                            <p class="text-sm text-slate-500 dark:text-slate-400">과거 예약 내역에 대한 상세 기록입니다.</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-1">
+                        <button id="history-refresh-btn" class="w-8 h-8 rounded-full hover:bg-slate-100 dark:hover:bg-slate-700 flex items-center justify-center text-slate-500 transition-colors" title="새로고침">
+                            <span class="material-symbols-outlined">refresh</span>
+                        </button>
+                        <button class="w-8 h-8 rounded-full hover:bg-slate-100 dark:hover:bg-slate-700 flex items-center justify-center text-slate-500 transition-colors">
+                            <span class="material-symbols-outlined">close</span>
+                        </button>
+                    </div>
+                </div>
+                <div class="overflow-y-auto p-6 flex-1 bg-slate-50/50 dark:bg-[#1a2632]/50">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                        <div class="bg-white dark:bg-[#1e2a38] p-4 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
+                            <div class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">총 이용 시간</div>
+                            <div class="flex items-end gap-2">
+                                <span id="history-total-duration" class="text-2xl font-bold text-slate-900 dark:text-white">-</span>
+                                <span class="text-sm font-medium text-slate-500 mb-1">시간</span>
+                            </div>
+                        </div>
+                        <div class="bg-white dark:bg-[#1e2a38] p-4 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
+                            <div class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">총 예약 횟수</div>
+                            <div class="flex items-end gap-2">
+                                <span id="history-total-count" class="text-2xl font-bold text-slate-900 dark:text-white">-</span>
+                                <span class="text-sm font-medium text-slate-500 mb-1">건</span>
+                            </div>
+                        </div>
+                        <div class="bg-white dark:bg-[#1e2a38] p-4 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
+                            <div class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">기간</div>
+                            <div class="flex items-center gap-2 mt-1">
+                                <span class="material-symbols-outlined text-slate-400 text-lg">date_range</span>
+                                <span id="history-period" class="text-sm font-medium text-slate-700 dark:text-slate-300">-</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-white dark:bg-[#1e2a38] rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden">
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left border-collapse">
+                                <thead>
+                                    <tr class="bg-slate-50 dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700">
+                                        <th class="py-3 px-4 text-xs font-semibold text-slate-500 uppercase tracking-wider w-24">ID</th>
+                                        <th class="py-3 px-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">곡명</th>
+                                        <th class="py-3 px-4 text-xs font-semibold text-slate-500 uppercase tracking-wider w-32">시작 시간</th>
+                                        <th class="py-3 px-4 text-xs font-semibold text-slate-500 uppercase tracking-wider w-32">이용 시간</th>
+                                        <th class="py-3 px-4 text-xs font-semibold text-slate-500 uppercase tracking-wider w-32">요청 시간</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="history-table-body" class="divide-y divide-slate-100 dark:divide-slate-700">
+                                    <!-- Dynamic Content -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                <div class="p-6 border-t border-slate-100 dark:border-slate-700 bg-white dark:bg-[#1e2a38] flex items-center justify-end gap-3">
+                    <button class="px-5 py-2.5 rounded-lg bg-primary hover:bg-blue-600 text-white font-medium text-sm transition-colors shadow-sm hover:shadow">
+                        닫기
+                    </button>
+                </div>
+            </div>
+        </div>
+    </main>
+</body>
+
+</html>
