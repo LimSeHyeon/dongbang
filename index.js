@@ -1,12 +1,13 @@
 import express from 'express';
 import { response } from "./src/Config/response.js";
 import cors from 'cors';
+import dotenv from 'dotenv';
 import { adminRouter } from './src/Admin/adminRouter.js';
 import { reserveRouter } from './src/Reserve/reserveRouter.js';
 import { syncReservationsToDB } from './src/Utils/scheduler.js';
 
 const app = express()
-const port = 3000
+const port = process.env.PORT;
 
 syncReservationsToDB();
 
