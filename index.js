@@ -1,5 +1,6 @@
 import express from 'express';
 import { response } from "./src/config/response.js";
+import path from 'path';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import { adminRouter } from './src/Admin/adminRouter.js';
