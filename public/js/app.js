@@ -991,17 +991,53 @@ function setupHistoryModal(modalContainer, closeModal) {
                                  </div>
                              </td>
                              <td class="py-3 px-4 text-sm text-slate-600 dark:text-slate-400">${row.startTime}</td>
-                             <td class="py-3 px-4">
-                                 <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400">
-                                     ${row.hapjuTerm}h
-                                 </span>
-                             </td>
-                             <td class="py-3 px-4 text-sm text-slate-600 dark:text-slate-400">${row.requestTime}</td>
+                             <td class="py-3 px-4 text-sm text-slate-600 dark:text-slate-400">${row.hapjuTerm}시간</td>
+                             <td class="py-3 px-4 text-sm text-slate-500 dark:text-slate-500">${row.requestTime}</td>
                          `;
                          tbody.appendChild(tr);
                     });
-                }
 
+                    // Populate Mobile List
+                    const mobileList = modalContainer.querySelector('#history-mobile-list');
+                    if (mobileList) {
+                        mobileList.innerHTML = '';
+                        rows.forEach(row => {
+                             const div = document.createElement('div');
+                             div.className = 'p-4 bg-white dark:bg-[#1e2a38]';
+                             
+                             const colors = ['purple', 'blue', 'orange', 'pink', 'indigo', 'red', 'green', 'yellow'];
+                             const color = colors[row.historyId % colors.length];
+
+                             div.innerHTML = `
+                                <div class="flex items-start gap-4">
+                                    <div class="w-10 h-10 rounded-lg bg-${color}-100 dark:bg-${color}-900/30 text-${color}-600 dark:text-${color}-400 flex items-center justify-center shrink-0 mt-0.5">
+                                        <span class="material-symbols-outlined">music_note</span>
+                                    </div>
+                                    <div class="flex-1 min-w-0">
+                                        <div class="flex items-start justify-between gap-2">
+                                            <h4 class="text-sm font-semibold text-slate-900 dark:text-white truncate pr-2">${row.songName}</h4>
+                                            <span class="text-[10px] font-mono text-slate-400 dark:text-slate-500 shrink-0">#${row.historyId}</span>
+                                        </div>
+                                        <div class="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-slate-500 dark:text-slate-400">
+                                            <span class="flex items-center gap-1">
+                                                <span class="material-symbols-outlined text-[14px]">schedule</span>
+                                                ${row.startTime}
+                                            </span>
+                                            <span class="flex items-center gap-1">
+                                                <span class="material-symbols-outlined text-[14px]">hourglass_bottom</span>
+                                                ${row.hapjuTerm}시간
+                                            </span>
+                                        </div>
+                                        <div class="mt-2 text-[10px] text-slate-400 dark:text-slate-500">
+                                            요청: ${row.requestTime}
+                                        </div>
+                                    </div>
+                                </div>
+                             `;
+                             mobileList.appendChild(div);
+                        });
+                    }
+                }
             } else {
                 console.error('Failed to load history:', data.message);
             }
