@@ -22,6 +22,15 @@ class ReservationSchedule {
 
         // Render immediately
         this.render();
+
+        // Add resize listener for responsive updates
+        let resizeTimeout;
+        window.addEventListener('resize', () => {
+            clearTimeout(resizeTimeout);
+            resizeTimeout = setTimeout(() => {
+                this.render();
+            }, 200);
+        });
     }
 
     calculateWeekDates() {
@@ -53,6 +62,16 @@ class ReservationSchedule {
         const start = this.weekDates[0];
         const end = this.weekDates[6];
         
+        // Mobile check (simple generic check)
+        const isMobile = window.innerWidth < 768;
+
+        if (isMobile) {
+             // Short format: 10.23 - 10.29
+             const startStr = `${start.getMonth() + 1}.${start.getDate()}`;
+             const endStr = `${end.getMonth() + 1}.${end.getDate()}`;
+             return `${startStr} - ${endStr}`;
+        }
+
         // Format: 10월 23일 - 10월 29일, 2023
         const startStr = `${start.getMonth() + 1}월 ${start.getDate()}일`;
         const endStr = `${end.getMonth() + 1}월 ${end.getDate()}일`;
@@ -90,7 +109,8 @@ class ReservationSchedule {
         const allButtons = Array.from(this.container.querySelectorAll('button'));
         const prev = allButtons.find(b => b.innerHTML.includes('chevron_left'));
         const next = allButtons.find(b => b.innerHTML.includes('chevron_right'));
-        const today = allButtons.find(b => b.innerText.includes('오늘'));
+        // "오늘" text check might fail if I change it to icon on mobile, but let's keep text for now or add data-action
+        const today = allButtons.find(b => b.innerText.includes('오늘') || b.dataset.action === 'today');
         const refresh = allButtons.find(b => b.id === 'refresh-btn');
 
         if (prev) prev.onclick = () => this.changeWeek(-7);
@@ -137,47 +157,49 @@ class ReservationSchedule {
 
         if (isAdmin) {
             return `
-                <div class="flex items-center justify-between px-6 py-4 border-b border-slate-200 dark:border-slate-700 bg-white dark:bg-[#1a2632]">
-                    <div class="flex items-center gap-4">
+                <div class="flex flex-col md:flex-row md:items-center justify-between px-4 md:px-6 py-3 md:py-4 border-b border-slate-200 dark:border-slate-700 bg-white dark:bg-[#1a2632] gap-3 md:gap-0">
+                    <div class="flex items-center justify-between md:justify-start md:gap-4 w-full md:w-auto">
                         <button class="p-2 flex items-center justify-center rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 transition-colors">
                             <span class="material-symbols-outlined">chevron_left</span>
                         </button>
-                        <h3 class="text-lg font-bold text-slate-900 dark:text-white">${rangeString}</h3>
+                        <h3 class="text-base md:text-lg font-bold text-slate-900 dark:text-white whitespace-nowrap">${rangeString}</h3>
                         <button class="p-2 flex items-center justify-center rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 transition-colors">
                             <span class="material-symbols-outlined">chevron_right</span>
                         </button>
                     </div>
-                    <div class="flex items-center gap-6">
-                         <div class="flex items-center gap-6 text-xs font-medium text-slate-500 dark:text-slate-400">
-                            <div class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-blue-100 dark:bg-blue-900/30 border border-blue-400"></span> 관리자 예약</div>
-                            <div class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-purple-100 dark:bg-purple-900/30 border border-purple-400"></span> 부원 예약</div>
+                    <div class="flex items-center justify-between md:justify-end gap-4 md:gap-6 w-full md:w-auto">
+                         <div class="flex items-center gap-4 text-xs font-medium text-slate-500 dark:text-slate-400">
+                            <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-blue-100 dark:bg-blue-900/30 border border-blue-400"></span><span class="hidden md:inline">관리자</span></div>
+                            <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-purple-100 dark:bg-purple-900/30 border border-purple-400"></span><span class="hidden md:inline">부원</span></div>
                         </div>
-                        <div class="w-px h-4 bg-slate-200 dark:bg-slate-700"></div>
-                        <button class="h-9 px-3 flex items-center justify-center hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg text-slate-500 text-sm font-medium transition-colors">오늘</button>
+                        <div class="hidden md:block w-px h-4 bg-slate-200 dark:bg-slate-700"></div>
+                        <button data-action="today" class="h-8 md:h-9 px-3 flex items-center justify-center hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg text-slate-500 text-sm font-medium transition-colors border border-slate-200 md:border-transparent dark:border-slate-700">오늘</button>
                     </div>
                 </div>
             `;
         } else {
             // Index header style
             return `
-                <div class="flex items-center justify-between px-6 py-4 border-b border-[#e5e7eb] dark:border-[#2a3441] bg-white dark:bg-[#1a2632]">
-                    <div class="flex items-center gap-4">
+                <div class="flex flex-col md:flex-row md:items-center justify-between px-4 md:px-6 py-3 md:py-4 border-b border-[#e5e7eb] dark:border-[#2a3441] bg-white dark:bg-[#1a2632] gap-3 md:gap-0">
+                    <div class="flex items-center justify-between md:justify-start md:gap-4 w-full md:w-auto">
                         <button class="p-2 flex items-center justify-center rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 transition-colors">
                             <span class="material-symbols-outlined">chevron_left</span>
                         </button>
-                        <h3 class="text-lg font-bold text-slate-800 dark:text-white">${rangeString}</h3>
+                        <h3 class="text-base md:text-lg font-bold text-slate-800 dark:text-white whitespace-nowrap">${rangeString}</h3>
                         <button class="p-2 flex items-center justify-center rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 transition-colors">
                             <span class="material-symbols-outlined">chevron_right</span>
                         </button>
                     </div>
-                    <div class="flex items-center gap-2">
-                        <button id="refresh-btn" class="p-2 mr-1 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 dark:text-slate-400 transition-colors" title="새로고침">
-                            <span class="material-symbols-outlined text-[20px]">refresh</span>
-                        </button>
-                        <button class="px-3 py-1.5 text-xs font-semibold text-primary bg-primary/10 rounded-lg">오늘</button>
-                        <div class="flex items-center gap-6 ml-4 text-xs font-medium text-slate-500 dark:text-slate-400">
-                            <div class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-primary/20 border border-primary"></span> 동아리 일정</div>
-                            <div class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-purple-100 dark:bg-purple-900/30 border border-purple-400"></span> 합주 예약</div>
+                    <div class="flex items-center justify-between md:justify-end gap-2 w-full md:w-auto">
+                        <div class="flex items-center gap-2">
+                            <button id="refresh-btn" class="p-2 mr-1 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 dark:text-slate-400 transition-colors" title="새로고침">
+                                <span class="material-symbols-outlined text-[20px]">refresh</span>
+                            </button>
+                            <button data-action="today" class="px-3 py-1.5 text-xs font-semibold text-primary bg-primary/10 rounded-lg whitespace-nowrap">오늘</button>
+                        </div>
+                        <div class="flex items-center gap-4 ml-2 md:ml-4 text-xs font-medium text-slate-500 dark:text-slate-400">
+                            <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-primary/20 border border-primary"></span><span class="hidden sm:inline">일정</span></div>
+                            <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-purple-100 dark:bg-purple-900/30 border border-purple-400"></span><span class="hidden sm:inline">합주</span></div>
                         </div>
                     </div>
                 </div>
@@ -191,12 +213,12 @@ class ReservationSchedule {
         
         return `
             <div class="flex-1 overflow-auto custom-scrollbar relative bg-white dark:bg-[#1a2632]">
-                <div class="min-w-[800px] ${isAdmin ? '' : 'pb-10'}">
+                <div class="w-full min-w-0 md:min-w-[800px] ${isAdmin ? '' : 'pb-10'}">
                     ${this.renderDaysHeader()}
                     
                     <div class="relative flex">
                         <!-- Time Column -->
-                        <div class="w-20 shrink-0 flex flex-col bg-white dark:bg-[#1a2632] border-r border-slate-200 dark:border-slate-800 text-xs font-medium text-slate-400 dark:text-slate-500 text-right select-none ${isAdmin ? 'sticky left-0 z-10' : ''}">
+                        <div class="w-10 md:w-20 shrink-0 flex flex-col bg-white dark:bg-[#1a2632] border-r border-slate-200 dark:border-slate-800 text-[10px] md:text-xs font-medium text-slate-400 dark:text-slate-500 text-right select-none ${isAdmin ? 'sticky left-0 z-10' : ''}">
                              ${this.renderTimeSlots()}
                         </div>
                         
@@ -235,8 +257,8 @@ class ReservationSchedule {
         
         if (isAdmin) {
              return `
-                <div class="grid grid-cols-[80px_repeat(7,1fr)] bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-700 text-sm sticky top-0 z-10">
-                    <div class="p-3 border-r border-slate-200 dark:border-slate-700"></div>
+                <div class="grid grid-cols-[2.5rem_repeat(7,1fr)] md:grid-cols-[80px_repeat(7,1fr)] bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-700 text-sm sticky top-0 z-10">
+                    <div class="p-2 md:p-3 border-r border-slate-200 dark:border-slate-700"></div>
                     ${this.days.map((day, i) => {
                         const dateObj = this.weekDates[i];
                         const isSelected = this.isToday(dateObj);
@@ -245,9 +267,9 @@ class ReservationSchedule {
                         const numClass = isSelected ? 'text-primary' : 'text-slate-700 dark:text-slate-200';
                         
                         return `
-                            <div class="p-3 text-center border-r border-slate-200 dark:border-slate-700 last:border-r-0">
-                                <p class="text-xs font-bold ${textClass} uppercase tracking-wider">${dayNames[day]}</p>
-                                <div class="text-lg font-bold ${numClass}">${dateObj.getDate()}</div>
+                            <div class="py-2 md:p-3 text-center border-r border-slate-200 dark:border-slate-700 last:border-r-0">
+                                <p class="text-[10px] md:text-xs font-bold ${textClass} uppercase tracking-wider">${dayNames[day]}</p>
+                                <div class="text-sm md:text-lg font-bold ${numClass}">${dateObj.getDate()}</div>
                             </div>
                         `;
                     }).join('')}
@@ -257,7 +279,7 @@ class ReservationSchedule {
             // Index Header with Dates
             return `
                 <div class="sticky top-0 z-20 flex border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-[#1a2632]">
-                    <div class="w-20 shrink-0 border-r border-slate-200 dark:border-slate-800"></div> 
+                    <div class="w-10 md:w-20 shrink-0 border-r border-slate-200 dark:border-slate-800"></div> 
                     <div class="flex-1 grid grid-cols-7 divide-x divide-slate-200 dark:divide-slate-800">
                         ${this.days.map((day, i) => {
                             const dateObj = this.weekDates[i];
@@ -268,9 +290,9 @@ class ReservationSchedule {
                             const numClass = isSelected ? 'text-primary' : (day === 'sat' || day === 'sun' ? 'text-slate-500 dark:text-slate-400' : 'text-slate-700 dark:text-slate-200');
                             
                             return `
-                                <div class="p-3 text-center ${bgClass}">
-                                    <p class="text-xs font-medium ${textClass} uppercase">${dayNames[day]}</p>
-                                    <p class="text-lg font-bold ${numClass}">${dateObj.getDate()}</p>
+                                <div class="py-2 md:p-3 text-center ${bgClass}">
+                                    <p class="text-[10px] md:text-xs font-medium ${textClass} uppercase">${dayNames[day]}</p>
+                                    <p class="text-sm md:text-lg font-bold ${numClass}">${dateObj.getDate()}</p>
                                 </div>
                             `;
                         }).join('')}

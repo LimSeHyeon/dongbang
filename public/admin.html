@@ -12,9 +12,9 @@
     <link rel="stylesheet" href="css/style.css" />
 </head>
 
-<body class="font-display bg-background-light dark:bg-background-dark text-slate-900 dark:text-white h-screen flex flex-col overflow-hidden">
+<body class="font-display bg-background-light dark:bg-background-dark text-slate-900 dark:text-white flex flex-col min-h-screen md:h-screen md:overflow-hidden relative">
     <!-- Header -->
-    <header class="flex items-center justify-between whitespace-nowrap border-b border-solid border-b-[#e5e7eb] dark:border-b-[#2a3441] bg-white dark:bg-[#1a2632] px-6 py-3 shrink-0 z-20">
+    <header class="flex items-center justify-between whitespace-nowrap border-b border-solid border-b-[#e5e7eb] dark:border-b-[#2a3441] bg-white dark:bg-[#1a2632] px-4 md:px-6 py-3 shrink-0 z-20">
         <div class="flex items-center gap-4 text-[#111418] dark:text-white">
             <div class="size-8 bg-primary/10 rounded-lg flex items-center justify-center text-primary">
                 <span class="material-symbols-outlined">admin_panel_settings</span>
@@ -28,9 +28,9 @@
     </header>
 
     <!-- Main Content Area -->
-    <main class="flex flex-1 overflow-hidden">
+    <main class="flex flex-col md:flex-row flex-1 md:overflow-hidden">
         <!-- Left Panel: Admin Controls -->
-        <aside class="w-full max-w-[400px] border-r border-[#e5e7eb] dark:border-[#2a3441] bg-white dark:bg-[#1a2632] flex flex-col overflow-y-auto shrink-0 z-10 shadow-lg">
+        <aside class="w-full md:w-[400px] md:max-w-none border-b md:border-b-0 md:border-r border-[#e5e7eb] dark:border-[#2a3441] bg-white dark:bg-[#1a2632] flex flex-col md:overflow-y-auto shrink-0 z-10 shadow-lg">
             <div class="p-6 space-y-10">
                 <!-- Admin Reservation -->
                 <div class="space-y-6">
@@ -229,7 +229,7 @@
                                 <span class="material-symbols-outlined">receipt_long</span>
                             </div>
                             <div>
-                                <h4 class="font-semibold text-sm mb-1">접속 로그</h4>
+                                <h4 class="font-semibold text-sm mb-1">예약 히스토리</h4>
                                 <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">과거 예약 내역을 확인합니다.</p>
                             </div>
                         </div>
@@ -249,7 +249,7 @@
         </aside>
 
         <!-- Right Panel: Schedule -->
-        <section id="admin-schedule" class="flex-1 flex flex-col bg-slate-50 dark:bg-[#0d1218] min-w-0">
+        <section id="admin-schedule" class="flex-1 flex flex-col bg-slate-50 dark:bg-[#0d1218] min-w-0 md:overflow-hidden">
             <!-- Schedule rendered by ReservationSchedule.js -->
         </section>
     </main>
