@@ -126,28 +126,86 @@ async function fetchReservations() {
 // --- Rendering Logic ---
 
 function renderReservations(isAdmin) {
-    // Clear existing
+    // Clear existing Desktop
     ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'].forEach(day => {
         const colId = isAdmin ? `admin-col-${day}` : `col-${day}`;
         const col = document.getElementById(colId);
         if (col) {
-            // Keep the column structure but remove cards?
-            // The columns in HTML are empty except placeholders.
-            // We should remove elements with class 'js-reservation-card'
             const existing = col.querySelectorAll('.js-reservation-card');
             existing.forEach(e => e.remove());
         }
+        
+        // Clear Mobile
+        const mobileContainer = document.querySelector(`#mobile-day-${day} .mobile-day-content`);
+        if (mobileContainer) {
+            mobileContainer.innerHTML = ''; // Clear "No reservations" text
+        }
     });
+
+    // Track which days have reservations
+    const activeDays = new Set();
 
     // Render new
     state.reservations.forEach(r => {
+        // Desktop Render
         const colId = isAdmin ? `admin-col-${r.day}` : `col-${r.day}`;
         const column = document.getElementById(colId);
         if (column) {
             column.appendChild(createReservationElement(r, isAdmin));
         }
+
+        // Mobile Render
+        const mobileContainer = document.querySelector(`#mobile-day-${r.day} .mobile-day-content`);
+        if (mobileContainer) {
+            activeDays.add(r.day);
+            mobileContainer.appendChild(createMobileReservationElement(r));
+        }
+    });
+
+    // Restore "No reservations" if empty
+    ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'].forEach(day => {
+         const mobileContainer = document.querySelector(`#mobile-day-${day} .mobile-day-content`);
+         if (mobileContainer && !activeDays.has(day)) {
+              mobileContainer.innerHTML = '<p class="text-center py-2 text-slate-400">예약 없음</p>';
+         }
     });
 }
+
+function createMobileReservationElement(data) {
+    const div = document.createElement('div');
+    
+    // Style matches desktop colors roughly but as a list item
+    let colorClasses = '';
+    if (data.colorClass === 'purple') colorClasses = 'bg-purple-50 dark:bg-purple-900/20 border-l-4 border-purple-500';
+    else if (data.colorClass === 'blue') colorClasses = 'bg-blue-50 dark:bg-blue-900/20 border-l-4 border-blue-500';
+    else if (data.colorClass === 'emerald') colorClasses = 'bg-emerald-50 dark:bg-emerald-900/20 border-l-4 border-emerald-500';
+    else if (data.colorClass === 'orange') colorClasses = 'bg-orange-50 dark:bg-orange-900/20 border-l-4 border-orange-500';
+
+    div.className = `p-3 rounded-lg shadow-sm border border-slate-100 dark:border-slate-800 mb-2 last:mb-0 ${colorClasses} flex justify-between items-center cursor-pointer js-reservation-card`;
+    div.setAttribute('data-id', data.id);
+
+    // Calculate End Time
+    const [startH, startM] = data.startTime.split(':').map(Number);
+    const endTotal = startH + (startM/60) + data.duration;
+    const endH = Math.floor(endTotal);
+    const endM = Math.round((endTotal - endH) * 60);
+    const endTimeStr = `${String(endH).padStart(2, '0')}:${String(endM).padStart(2, '0')}`;
+
+    div.innerHTML = `
+        <div class="flex-1">
+            <h5 class="font-bold text-slate-900 dark:text-white text-sm">${data.title}</h5>
+            <p class="text-xs text-slate-500 dark:text-slate-400 mt-1 font-mono">
+                ${data.startTime} - ${endTimeStr} (${data.duration}h)
+            </p>
+        </div>
+        ${data.isAdminViewOnly ? '' : '<span class="material-symbols-outlined text-slate-300">chevron_right</span>'}
+    `;
+
+    return div;
+}
+
+
+
 
 const START_HOUR = 8;
 const HOUR_HEIGHT_REM = 3.5;
@@ -747,7 +805,7 @@ async function loadModal(url, callback) {
         const modalContainer = document.createElement('div');
         modalContainer.className = 'modal-wrapper fixed inset-0 z-50';
         
-        const modalPart = doc.querySelector('.z-50.fixed, .z-50.absolute');
+        const modalPart = doc.querySelector('#login-modal-content') || doc.querySelector('.z-50.fixed, .z-50.absolute');
         const backdropPart = doc.querySelector('.backdrop-blur-sm');
         
         let extracted = false;
@@ -776,7 +834,7 @@ async function loadModal(url, callback) {
 }
 
 function setupLoginModal(modalContainer, closeModal, isPageGate = false) {
-    const loginBtn = modalContainer.querySelector('button.bg-primary') || modalContainer.querySelector('#login-btn');
+    const loginBtn = modalContainer.querySelector('#login-btn') || modalContainer.querySelector('button.bg-primary');
     const passwordInput = modalContainer.querySelector('input[type="password"]');
     
     const closeBtns = modalContainer.querySelectorAll('button');
