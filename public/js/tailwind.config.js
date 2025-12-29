@@ -11,6 +11,10 @@ tailwind.config = {
                 "display": ["Inter", "sans-serif"]
             },
             borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+            screens: {
+                'mobile': {'raw': '(max-aspect-ratio: 1/1) or (max-width: 1024px)'},
+                'desktop': {'raw': '(min-aspect-ratio: 1/1) and (min-width: 1024px)'},
+            }
         },
     },
 }
