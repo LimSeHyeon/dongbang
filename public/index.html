@@ -14,17 +14,18 @@
             theme: {
                 extend: {
                     colors: {
-                        "primary": "#137fec",
-                        "background-light": "#f6f7f8",
-                        "background-dark": "#101922",
-                    },
-                    fontFamily: {
-                        "display": ["Inter", "sans-serif"]
+                        primary: '#5D5CDE',
+                        secondary: '#A5A6F6',
+                        background: '#F8F9FE',
+                        surface: '#ffffff',
+                        text: '#2D3748',
+                        muted: '#A0AEC0',
+                        border: '#E2E8F0'
                     },
                     borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
                     screens: {
-                        'mobile': {'raw': '(max-aspect-ratio: 1/1), (max-width: 1024px)'},
-                        'desktop': {'raw': '(min-aspect-ratio: 1/1) and (min-width: 1024px)'},
+                        'mobile': {'raw': '(max-aspect-ratio: 1/1)'},
+                        'desktop': {'raw': '(min-aspect-ratio: 1001/1000)'},
                     }
                 },
             },
