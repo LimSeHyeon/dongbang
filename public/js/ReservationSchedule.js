@@ -72,8 +72,8 @@ class ReservationSchedule {
         const start = this.weekDates[0];
         const end = this.weekDates[6];
         
-        // Mobile check: Ratio based (Portrait = Mobile)
-        const isMobile = window.matchMedia('(max-aspect-ratio: 1/1)').matches;
+        // Mobile check: Pixel based (< 1024px)
+        const isMobile = window.matchMedia('(max-width: 1023px)').matches;
 
         if (isMobile) {
              // Short format: 10.23 - 10.29
@@ -98,30 +98,34 @@ class ReservationSchedule {
     }
 
     render() {
+        // 전체 구조 렌더링
         this.container.innerHTML = `
             ${this.renderHeader()}
-            ${this.renderMobileList()}
-            ${this.renderGrid()}
+            <div class="flex-1 flex flex-col overflow-hidden relative">
+                ${this.renderMobileList()}
+                ${this.renderGrid()}
+            </div>
         `;
         this.attachEventListeners();
     }
 
     renderMobileList() {
-        // Mobile List View Container (Hidden on Desktop)
-        // Day headers will be populated by renderReservations in app.js if we provide the structure
-        // Or we can pre-render the day blocks here.
+        // 모바일 리스트: 1024px 미만에서만 노출
         return `
             <div id="mobile-schedule-list" class="flex-1 overflow-y-auto bg-slate-50 dark:bg-[#0d1218] p-4 space-y-4 desktop:hidden">
                 ${this.days.map((day, i) => {
                      const dateObj = this.weekDates[i];
                      const dateStr = `${dateObj.getMonth() + 1}/${dateObj.getDate()}`;
                      const dayName = ['월', '화', '수', '목', '금', '토', '일'][i];
+                     const isToday = this.isToday(dateObj);
                      
                      return `
                         <div id="mobile-day-${day}" class="mobile-day-section">
-                            <h4 class="text-sm font-bold text-slate-500 mb-2 pl-1 border-l-4 border-slate-300 pl-2">${dateStr} ${dayName}요일</h4>
-                            <div class="space-y-2 mobile-day-content min-h-[50px] text-xs text-slate-400 p-2 border border-slate-100 rounded bg-white dark:bg-[#1a2632] dark:border-slate-800">
-                                <p class="text-center py-2">예약 없음</p>
+                            <h4 class="text-sm font-bold ${isToday ? 'text-primary' : 'text-slate-500'} mb-2 pl-2 border-l-4 ${isToday ? 'border-primary' : 'border-slate-300'}">
+                                ${dateStr} ${dayName}요일 ${isToday ? '(오늘)' : ''}
+                            </h4>
+                            <div class="space-y-2 mobile-day-content min-h-[60px] text-xs text-slate-400 p-3 border border-slate-200 dark:border-slate-800 rounded-xl bg-white dark:bg-[#1a2632]">
+                                <p class="text-center py-2 italic text-slate-400">예약 내역을 불러오는 중...</p>
                             </div>
                         </div>
                      `;
@@ -130,9 +134,7 @@ class ReservationSchedule {
         `;
     }
 
-    // Removed updateMobileView and switchMobileTab as they are no longer needed
-
-
+    // Event Listeners - Restored
     attachEventListeners() {
         const allButtons = Array.from(this.container.querySelectorAll('button:not(.mobile-tab-btn)'));
         const prev = allButtons.find(b => b.innerHTML.includes('chevron_left'));
@@ -178,32 +180,23 @@ class ReservationSchedule {
         const { isAdmin } = this.options;
         const colPrefix = isAdmin ? 'admin-col-' : 'col-';
         
+        // 데스크탑 그리드: 1024px 이상에서만 노출
         return `
             <div class="hidden desktop:flex flex-1 overflow-auto custom-scrollbar relative bg-white dark:bg-[#1a2632]">
                 <div class="w-full h-full flex flex-col ${isAdmin ? '' : 'pb-10'}">
                     ${this.renderDaysHeader()}
-                    
                     <div class="relative flex flex-1">
-                        <!-- Time Column -->
-                        <div class="w-10 md:w-20 shrink-0 flex flex-col bg-white dark:bg-[#1a2632] border-r border-slate-200 dark:border-slate-800 text-xs font-medium text-slate-400 dark:text-slate-500 text-right select-none ${isAdmin ? 'sticky left-0 z-10' : ''}">
+                        <div class="w-20 shrink-0 flex flex-col bg-white dark:bg-[#1a2632] border-r border-slate-200 dark:border-slate-800 text-xs font-medium text-slate-400 text-right select-none sticky left-0 z-10">
                              ${this.renderTimeSlots()}
                         </div>
-                        
-                        <!-- Slots Grid -->
                         <div class="flex-1 relative bg-[linear-gradient(#f1f5f9_1px,transparent_1px)] dark:bg-[linear-gradient(#1e293b_1px,transparent_1px)] bg-[size:100%_3.5rem] flex divide-x divide-slate-100 dark:divide-slate-800/50">
                             ${this.days.map((day, index) => {
-                                const isWeekend = day === 'sat' || day === 'sun';
-                                const bgClass = isWeekend ? 'bg-slate-50/50 dark:bg-[#15202b]/50' : '';
-                                
                                 const dateObj = this.weekDates[index];
                                 const isCurrentDate = this.isToday(dateObj);
-                                const extraClass = (!isAdmin && isCurrentDate) ? 'bg-primary/5 dark:bg-primary/5' : bgClass;
+                                const isWeekend = day === 'sat' || day === 'sun';
+                                const bgClass = isCurrentDate ? 'bg-primary/5' : (isWeekend ? 'bg-slate-50/50 dark:bg-[#15202b]/50' : '');
                                 
-                                return `
-                                    <div id="${colPrefix}${day}" class="relative flex-1 min-h-[896px] ${extraClass} group">
-                                        ${isAdmin ? this.renderAdminGridLines() : ''}
-                                    </div>
-                                `;
+                                return `<div id="${colPrefix}${day}" class="relative flex-1 min-h-[896px] ${bgClass} group"></div>`;
                             }).join('')}
                         </div>
                     </div>
@@ -326,11 +319,9 @@ class ReservationSchedule {
     }
 
     renderTimeSlots() {
-        // 08:00 to 23:00
         let html = '';
         for (let i = 8; i <= 23; i++) {
-            const time = i.toString().padStart(2, '0') + ':00';
-            html += `<div class="h-14 pr-3 pt-2 relative border-b border-transparent ${this.options.isAdmin ? 'border-b-slate-100 dark:border-b-slate-800' : ''}">${time}</div>`;
+            html += `<div class="h-14 pr-3 pt-2 border-b border-transparent text-slate-400">${i.toString().padStart(2, '0')}:00</div>`;
         }
         return html;
     }
