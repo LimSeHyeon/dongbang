@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="utf-8" />
-    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <meta content="width=device-width, initial-scale=1.0, viewport-fit=cover" name="viewport" />
     <title>관리자 기능</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet" />
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet" />
@@ -12,9 +12,9 @@
     <link rel="stylesheet" href="css/style.css" />
 </head>
 
-<body class="font-display bg-background-light dark:bg-background-dark text-slate-900 dark:text-white flex flex-col min-h-screen md:h-screen md:overflow-hidden relative">
+<body class="font-display bg-background-light dark:bg-background-dark text-slate-900 dark:text-white flex flex-col min-h-screen desktop:h-screen desktop:overflow-hidden relative">
     <!-- Header -->
-    <header class="flex items-center justify-between whitespace-nowrap border-b border-solid border-b-[#e5e7eb] dark:border-b-[#2a3441] bg-white dark:bg-[#1a2632] px-4 md:px-6 py-3 shrink-0 z-20">
+    <header class="flex items-center justify-between border-b border-solid border-b-[#e5e7eb] dark:border-b-[#2a3441] bg-white dark:bg-[#1a2632] px-4 md:px-6 py-3 shrink-0 z-20">
         <div class="flex items-center gap-4 text-[#111418] dark:text-white">
             <div class="size-8 bg-primary/10 rounded-lg flex items-center justify-center text-primary">
                 <span class="material-symbols-outlined">admin_panel_settings</span>
@@ -28,10 +28,10 @@
     </header>
 
     <!-- Main Content Area -->
-    <main class="flex flex-col md:flex-row flex-1 md:overflow-hidden">
+    <main class="flex flex-col desktop:flex-row flex-1 desktop:overflow-hidden">
         <!-- Left Panel: Admin Controls -->
-        <aside class="w-full md:w-[400px] md:max-w-none border-b md:border-b-0 md:border-r border-[#e5e7eb] dark:border-[#2a3441] bg-white dark:bg-[#1a2632] flex flex-col md:overflow-y-auto shrink-0 z-10 shadow-lg">
-            <div class="p-6 space-y-10">
+        <aside class="w-full desktop:w-[400px] desktop:max-w-none border-b desktop:border-b-0 desktop:border-r border-[#e5e7eb] dark:border-[#2a3441] bg-white dark:bg-[#1a2632] flex flex-col desktop:overflow-y-auto shrink-0 z-10 shadow-lg">
+            <div class="p-4 md:p-6 space-y-8 md:space-y-10">
                 <!-- Admin Reservation -->
                 <div class="space-y-6">
                     <div class="flex items-center gap-2 pb-2 border-b border-slate-100 dark:border-slate-700">
@@ -249,7 +249,7 @@
         </aside>
 
         <!-- Right Panel: Schedule -->
-        <section id="admin-schedule" class="flex-1 flex flex-col bg-slate-50 dark:bg-[#0d1218] min-w-0 md:overflow-hidden">
+        <section id="admin-schedule" class="flex-1 flex flex-col bg-slate-50 dark:bg-[#0d1218] min-w-0 desktop:overflow-hidden">
             <!-- Schedule rendered by ReservationSchedule.js -->
         </section>
     </main>

@@ -18,6 +18,12 @@ class ReservationSchedule {
         this.fullDays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
         
         this.currentDate = new Date();
+        
+        // Initialize mobile tab index based on today
+        const day = this.currentDate.getDay(); // 0=Sun, 1=Mon...6=Sat
+        // Our grid is [Mon, Tue, Wed, Thu, Fri, Sat, Sun] indices 0..6
+        this.activeMobileTabIndex = day === 0 ? 6 : day - 1;
+        
         this.calculateWeekDates();
 
         // Render immediately
@@ -29,6 +35,10 @@ class ReservationSchedule {
             clearTimeout(resizeTimeout);
             resizeTimeout = setTimeout(() => {
                 this.render();
+                // Ensure data is re-fetched/re-rendered if needed
+                if (this.options.onWeekChange) {
+                     this.options.onWeekChange(this.currentDate);
+                }
             }, 200);
         });
     }
@@ -62,8 +72,8 @@ class ReservationSchedule {
         const start = this.weekDates[0];
         const end = this.weekDates[6];
         
-        // Mobile check (simple generic check)
-        const isMobile = window.innerWidth < 768;
+        // Mobile check (simple generic check matching CSS)
+        const isMobile = window.matchMedia('(max-aspect-ratio: 1/1), (max-width: 1024px)').matches;
 
         if (isMobile) {
              // Short format: 10.23 - 10.29
@@ -90,26 +100,85 @@ class ReservationSchedule {
     render() {
         this.container.innerHTML = `
             ${this.renderHeader()}
+            ${this.renderMobileTabs()}
             ${this.renderGrid()}
         `;
         this.attachEventListeners();
+        this.updateMobileView();
+    }
+
+    renderMobileTabs() {
+        // Only visible on mobile
+        const dayNames = ['월', '화', '수', '목', '금', '토', '일'];
+        return `
+            <div class="flex desktop:hidden overflow-x-auto border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-[#1a2632] scrollbar-hide">
+                ${dayNames.map((name, i) => `
+                    <button data-tab-index="${i}" class="mobile-tab-btn flex-1 py-3 text-sm font-medium text-slate-500 relative whitespace-nowrap px-4 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
+                        ${name}
+                        ${i === this.activeMobileTabIndex ? '<div class="absolute bottom-0 left-0 right-0 h-0.5 bg-primary"></div>' : ''}
+                    </button>
+                `).join('')}
+            </div>
+        `;
+    }
+
+    updateMobileView() {
+        // Toggle columns based on active tab ONLY if mobile
+        const isMobile = window.matchMedia('(max-aspect-ratio: 1/1), (max-width: 1024px)').matches;
+        
+        const cols = this.container.querySelectorAll('[id^="col-"], [id^="admin-col-"]');
+        cols.forEach((col, i) => {
+            if (isMobile) {
+                if (i === this.activeMobileTabIndex) {
+                    col.style.display = 'block';
+                    col.style.width = '100%';
+                } else {
+                    col.style.display = 'none';
+                }
+            } else {
+                col.style.display = 'block';
+                col.style.width = ''; 
+            }
+        });
+
+        // Hide regular header on mobile (tabs replace it)
+        const headerContainer = this.container.querySelector('.days-header-container');
+        if (headerContainer) {
+             if (isMobile) {
+                 headerContainer.style.display = 'none';
+             } else {
+                 if (headerContainer.classList.contains('grid')) headerContainer.style.display = 'grid';
+                 else headerContainer.style.display = 'flex';
+             }
+        }
+
+        // Update Tab Active State in DOM
+        const tabs = this.container.querySelectorAll('.mobile-tab-btn');
+        tabs.forEach((tab, i) => {
+            if (i === this.activeMobileTabIndex) {
+                tab.classList.add('text-primary', 'font-bold');
+                tab.classList.remove('text-slate-500');
+                if (!tab.querySelector('.bg-primary')) {
+                    tab.innerHTML += '<div class="absolute bottom-0 left-0 right-0 h-0.5 bg-primary"></div>';
+                }
+            } else {
+                tab.classList.remove('text-primary', 'font-bold');
+                tab.classList.add('text-slate-500');
+                const indicator = tab.querySelector('.bg-primary');
+                if (indicator) indicator.remove();
+            }
+        });
+    }
+
+    switchMobileTab(index) {
+        this.activeMobileTabIndex = index;
+        this.updateMobileView();
     }
 
     attachEventListeners() {
-        // We know the structure: Prev, Today, Next are key buttons.
-        // Update selection logic to be more robust or account for new refresh button.
-        const prevBtn = this.container.querySelector('button .material-symbols-outlined').closest('button');
-        // Actually, let's stick to indices but be careful.
-        // Left group: Prev [0], Next [1] (Wait, check order in renderHeader)
-        // Admin: Prev, Next. Right: Today.
-        // Index: Prev, Next. Right: Refresh, Today.
-        
-        // Let's use specific selectors if possible, or classes. But they don't have unique classes.
-        // Let's use the material icon content to identify.
-        const allButtons = Array.from(this.container.querySelectorAll('button'));
+        const allButtons = Array.from(this.container.querySelectorAll('button:not(.mobile-tab-btn)'));
         const prev = allButtons.find(b => b.innerHTML.includes('chevron_left'));
         const next = allButtons.find(b => b.innerHTML.includes('chevron_right'));
-        // "오늘" text check might fail if I change it to icon on mobile, but let's keep text for now or add data-action
         const today = allButtons.find(b => b.innerText.includes('오늘') || b.dataset.action === 'today');
         const refresh = allButtons.find(b => b.id === 'refresh-btn');
 
@@ -118,11 +187,7 @@ class ReservationSchedule {
         if (today) today.onclick = () => this.goToToday();
         if (refresh && this.options.onWeekChange) {
             refresh.onclick = () => {
-                // Trigger refresh logic (re-fetch)
-                // We can treat it as re-rendering or custom callback
                 this.options.onWeekChange(this.currentDate);
-                
-                // Add simple animation
                 const icon = refresh.querySelector('.material-symbols-outlined');
                 if(icon) {
                     icon.style.transition = 'transform 0.5s ease';
@@ -131,24 +196,53 @@ class ReservationSchedule {
                 }
             };
         }
+
+        // Mobile Tabs
+        const tabBtns = this.container.querySelectorAll('.mobile-tab-btn');
+        tabBtns.forEach(btn => {
+            btn.onclick = () => {
+                const idx = parseInt(btn.dataset.tabIndex);
+                this.switchMobileTab(idx);
+            };
+        });
     }
 
-    changeWeek(days) {
-        this.currentDate.setDate(this.currentDate.getDate() + days);
-        this.calculateWeekDates();
-        this.render();
-        if (this.options.onWeekChange) {
-            this.options.onWeekChange(this.currentDate);
-        }
-    }
-
-    goToToday() {
-        this.currentDate = new Date();
-        this.calculateWeekDates();
-        this.render();
-        if (this.options.onWeekChange) {
-            this.options.onWeekChange(this.currentDate);
-        }
+    renderGrid() {
+        const { isAdmin } = this.options;
+        const colPrefix = isAdmin ? 'admin-col-' : 'col-';
+        
+        return `
+            <div class="flex-1 overflow-auto custom-scrollbar relative bg-white dark:bg-[#1a2632]">
+                <div class="w-full h-full flex flex-col ${isAdmin ? '' : 'pb-10'}">
+                    ${this.renderDaysHeader()}
+                    
+                    <div class="relative flex flex-1">
+                        <!-- Time Column -->
+                        <div class="w-10 md:w-20 shrink-0 flex flex-col bg-white dark:bg-[#1a2632] border-r border-slate-200 dark:border-slate-800 text-xs font-medium text-slate-400 dark:text-slate-500 text-right select-none ${isAdmin ? 'sticky left-0 z-10' : ''}">
+                             ${this.renderTimeSlots()}
+                        </div>
+                        
+                        <!-- Slots Grid -->
+                        <div class="flex-1 relative bg-[linear-gradient(#f1f5f9_1px,transparent_1px)] dark:bg-[linear-gradient(#1e293b_1px,transparent_1px)] bg-[size:100%_3.5rem] flex divide-x divide-slate-100 dark:divide-slate-800/50">
+                            ${this.days.map((day, index) => {
+                                const isWeekend = day === 'sat' || day === 'sun';
+                                const bgClass = isWeekend ? 'bg-slate-50/50 dark:bg-[#15202b]/50' : '';
+                                
+                                const dateObj = this.weekDates[index];
+                                const isCurrentDate = this.isToday(dateObj);
+                                const extraClass = (!isAdmin && isCurrentDate) ? 'bg-primary/5 dark:bg-primary/5' : bgClass;
+                                
+                                return `
+                                    <div id="${colPrefix}${day}" class="relative flex-1 min-h-[896px] ${extraClass} group">
+                                        ${isAdmin ? this.renderAdminGridLines() : ''}
+                                    </div>
+                                `;
+                            }).join('')}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
     }
 
     renderHeader() {
@@ -178,7 +272,6 @@ class ReservationSchedule {
                 </div>
             `;
         } else {
-            // Index header style
             return `
                 <div class="flex flex-col md:flex-row md:items-center justify-between px-4 md:px-6 py-3 md:py-4 border-b border-[#e5e7eb] dark:border-[#2a3441] bg-white dark:bg-[#1a2632] gap-3 md:gap-0">
                     <div class="flex items-center justify-between md:justify-start md:gap-4 w-full md:w-auto">
@@ -207,47 +300,8 @@ class ReservationSchedule {
         }
     }
 
-    renderGrid() {
-        const { isAdmin } = this.options;
-        const colPrefix = isAdmin ? 'admin-col-' : 'col-';
-        
-        return `
-            <div class="flex-1 overflow-auto custom-scrollbar relative bg-white dark:bg-[#1a2632]">
-                <div class="w-full min-w-0 md:min-w-[800px] ${isAdmin ? '' : 'pb-10'}">
-                    ${this.renderDaysHeader()}
-                    
-                    <div class="relative flex">
-                        <!-- Time Column -->
-                        <div class="w-10 md:w-20 shrink-0 flex flex-col bg-white dark:bg-[#1a2632] border-r border-slate-200 dark:border-slate-800 text-[10px] md:text-xs font-medium text-slate-400 dark:text-slate-500 text-right select-none ${isAdmin ? 'sticky left-0 z-10' : ''}">
-                             ${this.renderTimeSlots()}
-                        </div>
-                        
-                        <!-- Slots Grid -->
-                        <div class="flex-1 relative bg-[linear-gradient(#f1f5f9_1px,transparent_1px)] dark:bg-[linear-gradient(#1e293b_1px,transparent_1px)] bg-[size:100%_3.5rem] grid grid-cols-7 divide-x divide-slate-100 dark:divide-slate-800/50">
-                            ${this.days.map((day, index) => {
-                                const isWeekend = day === 'sat' || day === 'sun';
-                                const bgClass = isWeekend ? 'bg-slate-50/50 dark:bg-[#15202b]/50' : '';
-                                
-                                const dateObj = this.weekDates[index];
-                                const isCurrentDate = this.isToday(dateObj);
-                                const extraClass = (!isAdmin && isCurrentDate) ? 'bg-primary/5 dark:bg-primary/5' : bgClass;
-                                
-                                return `
-                                    <div id="${colPrefix}${day}" class="relative min-h-[896px] ${extraClass} group">
-                                        ${isAdmin ? this.renderAdminGridLines() : ''}
-                                    </div>
-                                `;
-                            }).join('')}
-                        </div>
-                    </div>
-                </div>
-            </div>
-        `;
-    }
-
     renderDaysHeader() {
         const { isAdmin } = this.options;
-        // Korean day names map
         const dayNames = {
             'mon': '월', 'tue': '화', 'wed': '수', 'thu': '목', 'fri': '금', 'sat': '토', 'sun': '일'
         };
@@ -255,9 +309,11 @@ class ReservationSchedule {
              'mon': '월요일', 'tue': '화요일', 'wed': '수요일', 'thu': '목요일', 'fri': '금요일', 'sat': '토요일', 'sun': '일요일'
         };
         
+        const containerClass = "days-header-container";
+
         if (isAdmin) {
              return `
-                <div class="grid grid-cols-[2.5rem_repeat(7,1fr)] md:grid-cols-[80px_repeat(7,1fr)] bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-700 text-sm sticky top-0 z-10">
+                <div class="${containerClass} grid grid-cols-[2.5rem_repeat(7,1fr)] md:grid-cols-[80px_repeat(7,1fr)] bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-700 text-sm sticky top-0 z-10 transition-all duration-300">
                     <div class="p-2 md:p-3 border-r border-slate-200 dark:border-slate-700"></div>
                     ${this.days.map((day, i) => {
                         const dateObj = this.weekDates[i];
@@ -268,7 +324,7 @@ class ReservationSchedule {
                         
                         return `
                             <div class="py-2 md:p-3 text-center border-r border-slate-200 dark:border-slate-700 last:border-r-0">
-                                <p class="text-[10px] md:text-xs font-bold ${textClass} uppercase tracking-wider">${dayNames[day]}</p>
+                                <p class="text-xs font-bold ${textClass} uppercase tracking-wider">${dayNames[day]}</p>
                                 <div class="text-sm md:text-lg font-bold ${numClass}">${dateObj.getDate()}</div>
                             </div>
                         `;
@@ -278,7 +334,7 @@ class ReservationSchedule {
         } else {
             // Index Header with Dates
             return `
-                <div class="sticky top-0 z-20 flex border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-[#1a2632]">
+                <div class="${containerClass} sticky top-0 z-20 flex border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-[#1a2632] transition-all duration-300">
                     <div class="w-10 md:w-20 shrink-0 border-r border-slate-200 dark:border-slate-800"></div> 
                     <div class="flex-1 grid grid-cols-7 divide-x divide-slate-200 dark:divide-slate-800">
                         ${this.days.map((day, i) => {
@@ -291,7 +347,7 @@ class ReservationSchedule {
                             
                             return `
                                 <div class="py-2 md:p-3 text-center ${bgClass}">
-                                    <p class="text-[10px] md:text-xs font-medium ${textClass} uppercase">${dayNames[day]}</p>
+                                    <p class="text-xs font-medium ${textClass} uppercase">${dayNames[day]}</p>
                                     <p class="text-sm md:text-lg font-bold ${numClass}">${dateObj.getDate()}</p>
                                 </div>
                             `;
