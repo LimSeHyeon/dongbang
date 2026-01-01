@@ -127,11 +127,14 @@ class ReservationSchedule {
                      const isToday = this.isToday(dateObj);
                      
                      return `
-                        <div id="mobile-day-${day}" class="mobile-day-section">
-                            <h4 class="text-sm font-bold ${isToday ? 'text-primary' : 'text-slate-500'} mb-2 pl-2 border-l-4 ${isToday ? 'border-primary' : 'border-slate-300'}">
-                                ${dateStr} ${dayName}요일 ${isToday ? '(오늘)' : ''}
-                            </h4>
-                            <div class="space-y-2 mobile-day-content min-h-[60px] text-xs text-slate-400 p-3 border border-slate-200 dark:border-slate-800 rounded-xl bg-white dark:bg-[#1a2632]">
+                        <div id="mobile-day-${day}" class="mobile-day-section cursor-pointer transition-transform active:scale-[0.99]" data-index="${i}">
+                            <div class="flex items-center justify-between mb-2 pl-2 border-l-4 ${isToday ? 'border-primary' : 'border-slate-300'}">
+                                <h4 class="text-sm font-bold ${isToday ? 'text-primary' : 'text-slate-500'}">
+                                    ${dateStr} ${dayName}요일 ${isToday ? '(오늘)' : ''}
+                                </h4>
+                                <span class="material-symbols-outlined text-slate-300 text-sm">open_in_full</span>
+                            </div>
+                            <div class="space-y-2 mobile-day-content min-h-[60px] text-xs text-slate-400 p-3 border border-slate-200 dark:border-slate-800 rounded-xl bg-white dark:bg-[#1a2632] shadow-sm hover:shadow-md transition-shadow">
                                 <p class="text-center py-2 italic text-slate-400">예약 내역을 불러오는 중...</p>
                             </div>
                         </div>
@@ -163,6 +166,19 @@ class ReservationSchedule {
                 }
             };
         }
+
+        // Mobile Day Click Listeners
+        const mobileDays = this.container.querySelectorAll('.mobile-day-section');
+        mobileDays.forEach(el => {
+            el.addEventListener('click', (e) => {
+                // Prevent bubbling if clicking internal interactive elements if any (not really applicable here but good practice)
+                const index = parseInt(el.getAttribute('data-index'));
+                const date = this.weekDates[index];
+                if (this.options.onDayClick) {
+                    this.options.onDayClick(date);
+                }
+            });
+        });
     }
 
     changeWeek(offset) {

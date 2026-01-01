@@ -41,11 +41,132 @@ function init() {
             showDates: true,
             onWeekChange: (newDate) => {
                 fetchReservations();
+            },
+            onDayClick: (date) => {
+                handleMobileDayClick(date);
             }
         });
         fetchReservations();
         setupIndexInteractions();
     }
+}
+
+function handleMobileDayClick(date) {
+    loadModal('mobileDayModal.html', (container, close) => {
+        setupMobileDayModal(container, close, date);
+    });
+}
+
+function setupMobileDayModal(modalContainer, closeModal, initialDate) {
+    let currentDate = new Date(initialDate);
+
+    // Helper: Get formatted date parts
+    const getDayInfo = (date) => {
+        const days = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
+        const dayShort = days[date.getDay()];
+        const dayNamesKO = ['일', '월', '화', '수', '목', '금', '토'];
+        const dayName = dayNamesKO[date.getDay()];
+        return { dayShort, dayName };
+    };
+
+    // Calculate Week Boundaries (Monday to Sunday)
+    let minDate, maxDate;
+    if (state.reservationSchedule && typeof state.reservationSchedule.getMondayDate === 'function') {
+        minDate = new Date(state.reservationSchedule.getMondayDate());
+        minDate.setHours(0,0,0,0);
+        
+        maxDate = new Date(minDate);
+        maxDate.setDate(minDate.getDate() + 6);
+        maxDate.setHours(23,59,59,999);
+    }
+
+    const render = () => {
+        const { dayShort, dayName } = getDayInfo(currentDate);
+
+        // 1. Update Title
+        const dateTitle = modalContainer.querySelector('#mobile-modal-date');
+        if (dateTitle) {
+            dateTitle.innerText = `${currentDate.getMonth() + 1}월 ${currentDate.getDate()}일 ${dayName}요일`;
+        }
+
+        // 2. Update Navigation Buttons State
+        const prevBtn = modalContainer.querySelector('.js-prev-day');
+        const nextBtn = modalContainer.querySelector('.js-next-day');
+
+        if (minDate && prevBtn) {
+            // Disable if previous day is before minDate
+            const prevDay = new Date(currentDate);
+            prevDay.setDate(currentDate.getDate() - 1);
+            prevBtn.disabled = prevDay < minDate;
+        }
+
+        if (maxDate && nextBtn) {
+             const nextDay = new Date(currentDate);
+             nextDay.setDate(currentDate.getDate() + 1);
+             nextBtn.disabled = nextDay > maxDate;
+        }
+
+        // 3. Filter & Render Reservations
+        const targetReservations = state.reservations.filter(r => r.day === dayShort);
+        
+        targetReservations.sort((a, b) => {
+            return a.startTime.localeCompare(b.startTime);
+        });
+
+        const listContainer = modalContainer.querySelector('#mobile-modal-list');
+        if (listContainer) {
+            listContainer.innerHTML = '';
+            
+            if (targetReservations.length === 0) {
+                listContainer.innerHTML = `
+                    <div class="flex flex-col items-center justify-center py-12 text-slate-400">
+                        <span class="material-symbols-outlined text-5xl mb-3 opacity-30">event_busy</span>
+                        <p class="text-sm">예약된 일정이 없습니다</p>
+                    </div>
+                `;
+            } else {
+                targetReservations.forEach(r => {
+                    const el = createMobileReservationElement(r);
+                    el.classList.remove('mb-2'); 
+                    el.classList.add('mb-3');
+                    // Ensure interactions work
+                    el.classList.remove('pointer-events-none'); 
+                    listContainer.appendChild(el);
+                });
+            }
+        }
+    };
+
+    // Initial Render
+    render();
+
+    // Event Listeners
+    const prevBtn = modalContainer.querySelector('.js-prev-day');
+    const nextBtn = modalContainer.querySelector('.js-next-day');
+
+    if (prevBtn) {
+        prevBtn.addEventListener('click', () => {
+            currentDate.setDate(currentDate.getDate() - 1);
+            render();
+        });
+    }
+
+    if (nextBtn) {
+        nextBtn.addEventListener('click', () => {
+            currentDate.setDate(currentDate.getDate() + 1);
+            render();
+        });
+    }
+
+    // Close Handlers
+    const closeBtns = modalContainer.querySelectorAll('.js-close-modal');
+    closeBtns.forEach(btn => btn.addEventListener('click', closeModal));
+
+    const backdrop = modalContainer.querySelector('.js-backdrop');
+    const backdropBlur = modalContainer.querySelector('.backdrop-blur-sm');
+
+    if (backdrop) backdrop.addEventListener('click', closeModal);
+    else if (backdropBlur) backdropBlur.addEventListener('click', closeModal);
 }
 
 function checkAdminAuth() {
@@ -158,7 +279,9 @@ function renderReservations(isAdmin) {
         const mobileContainer = document.querySelector(`#mobile-day-${r.day} .mobile-day-content`);
         if (mobileContainer) {
             activeDays.add(r.day);
-            mobileContainer.appendChild(createMobileReservationElement(r));
+            const el = createMobileReservationElement(r);
+            el.classList.add('pointer-events-none'); // Disable clicks on the card itself so the day row click works
+            mobileContainer.appendChild(el);
         }
     });
 
