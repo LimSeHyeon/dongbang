@@ -18,6 +18,7 @@ class ReservationSchedule {
         this.fullDays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
         
         this.currentDate = new Date();
+        this.mobileViewMode = 'list'; // 'list' or 'grid'
         
         // Initialize mobile tab index based on today
         const day = this.currentDate.getDay(); // 0=Sun, 1=Mon...6=Sat
@@ -117,9 +118,10 @@ class ReservationSchedule {
     }
 
     renderMobileList() {
-        // 모바일 리스트: 1024px 미만에서만 노출
+        // 모바일 리스트: 1024px 미만에서만 노출 + 리스트 모드일 때
+        const displayClass = this.mobileViewMode === 'list' ? 'block' : 'hidden';
         return `
-            <div id="mobile-schedule-list" class="flex-1 overflow-y-auto bg-slate-50 dark:bg-[#0d1218] p-4 space-y-4 desktop:hidden">
+            <div id="mobile-schedule-list" class="flex-1 overflow-y-auto bg-slate-50 dark:bg-[#0d1218] p-4 space-y-4 desktop:hidden ${displayClass}">
                 ${this.days.map((day, i) => {
                      const dateObj = this.weekDates[i];
                      const dateStr = `${dateObj.getMonth() + 1}/${dateObj.getDate()}`;
@@ -167,6 +169,18 @@ class ReservationSchedule {
             };
         }
 
+        // View Mode Toggle (Mobile)
+        const viewToggle = allButtons.find(b => b.id === 'view-mode-toggle');
+        if (viewToggle) {
+            viewToggle.onclick = () => {
+                this.mobileViewMode = this.mobileViewMode === 'list' ? 'grid' : 'list';
+                this.render();
+                if (this.options.onWeekChange) {
+                    this.options.onWeekChange(this.currentDate);
+                }
+            };
+        }
+
         // Mobile Day Click Listeners
         const mobileDays = this.container.querySelectorAll('.mobile-day-section');
         mobileDays.forEach(el => {
@@ -203,13 +217,17 @@ class ReservationSchedule {
         const { isAdmin } = this.options;
         const colPrefix = isAdmin ? 'admin-col-' : 'col-';
         
-        // 데스크탑 그리드: 1024px 이상에서만 노출
+        // 데스크탑: 항상 보임 (desktop:flex)
+        // 모바일: 그리드 모드일 때만 보임 (flex), 아니면 hidden
+        // 모바일에서 그리드 보일 때는 overflow scroll 필요
+        const mobileClass = this.mobileViewMode === 'grid' ? 'flex' : 'hidden';
+        
         return `
-            <div class="hidden desktop:flex flex-1 overflow-auto custom-scrollbar relative bg-white dark:bg-[#1a2632]">
+            <div class="${mobileClass} desktop:flex flex-1 overflow-auto custom-scrollbar relative bg-white dark:bg-[#1a2632]">
                 <div class="w-full h-full flex flex-col ${isAdmin ? '' : 'pb-10'}">
                     ${this.renderDaysHeader()}
                     <div class="relative flex flex-1">
-                        <div class="w-20 shrink-0 flex flex-col bg-white dark:bg-[#1a2632] border-r border-slate-200 dark:border-slate-800 text-xs font-medium text-slate-400 text-right select-none sticky left-0 z-10">
+                        <div class="w-10 md:w-20 shrink-0 flex flex-col bg-white dark:bg-[#1a2632] border-r border-slate-200 dark:border-slate-800 text-xs font-medium text-slate-400 text-right select-none sticky left-0 z-10">
                              ${this.renderTimeSlots()}
                         </div>
                         <div class="flex-1 relative bg-[linear-gradient(#f1f5f9_1px,transparent_1px)] dark:bg-[linear-gradient(#1e293b_1px,transparent_1px)] bg-[size:100%_3.5rem] flex divide-x divide-slate-100 dark:divide-slate-800/50">
@@ -268,6 +286,11 @@ class ReservationSchedule {
                     </div>
                     <div class="flex items-center justify-between md:justify-end gap-2 w-full md:w-auto">
                         <div class="flex items-center gap-2">
+                            <!-- Toggle Button -->
+                            <button id="view-mode-toggle" class="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-primary dark:text-primary transition-colors" title="보기 모드 변경">
+                                <span class="material-symbols-outlined text-[20px]">${this.mobileViewMode === 'list' ? 'grid_view' : 'view_list'}</span>
+                            </button>
+                            
                             <button id="refresh-btn" class="p-2 mr-1 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 dark:text-slate-400 transition-colors" title="새로고침">
                                 <span class="material-symbols-outlined text-[20px]">refresh</span>
                             </button>
@@ -293,33 +316,37 @@ class ReservationSchedule {
         };
         
         const containerClass = "days-header-container";
+        // Header also follows grid visibility on mobile. Use 'flex' now.
+        const mobileClass = this.mobileViewMode === 'grid' ? 'flex' : 'hidden';
 
         if (isAdmin) {
              return `
-                <div class="${containerClass} hidden desktop:grid grid-cols-[2.5rem_repeat(7,1fr)] desktop:grid-cols-[80px_repeat(7,1fr)] bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-700 text-sm sticky top-0 z-10 transition-all duration-300">
-                    <div class="p-2 md:p-3 border-r border-slate-200 dark:border-slate-700"></div>
-                    ${this.days.map((day, i) => {
-                        const dateObj = this.weekDates[i];
-                        const isSelected = this.isToday(dateObj);
-                        
-                        const textClass = isSelected ? 'text-primary' : 'text-slate-500 dark:text-slate-400';
-                        const numClass = isSelected ? 'text-primary' : 'text-slate-700 dark:text-slate-200';
-                        
-                        return `
-                            <div class="py-2 md:p-3 text-center border-r border-slate-200 dark:border-slate-700 last:border-r-0">
-                                <p class="text-xs font-bold ${textClass} uppercase tracking-wider">${dayNames[day]}</p>
-                                <div class="text-sm md:text-lg font-bold ${numClass}">${dateObj.getDate()}</div>
-                            </div>
-                        `;
-                    }).join('')}
+                <div class="${containerClass} ${mobileClass} desktop:flex sticky top-0 z-10 bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-700 text-sm transition-all duration-300">
+                    <div class="w-10 md:w-20 shrink-0 border-r border-slate-200 dark:border-slate-700"></div>
+                    <div class="flex-1 flex divide-x divide-slate-200 dark:divide-slate-700">
+                        ${this.days.map((day, i) => {
+                            const dateObj = this.weekDates[i];
+                            const isSelected = this.isToday(dateObj);
+                            
+                            const textClass = isSelected ? 'text-primary' : 'text-slate-500 dark:text-slate-400';
+                            const numClass = isSelected ? 'text-primary' : 'text-slate-700 dark:text-slate-200';
+                            
+                            return `
+                                <div class="flex-1 py-2 md:p-3 text-center">
+                                    <p class="text-xs font-bold ${textClass} uppercase tracking-wider">${dayNames[day]}</p>
+                                    <div class="text-sm md:text-lg font-bold ${numClass}">${dateObj.getDate()}</div>
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
                 </div>
              `;
         } else {
             // Index Header with Dates
             return `
-                <div class="${containerClass} hidden desktop:flex sticky top-0 z-20 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-[#1a2632] transition-all duration-300">
+                <div class="${containerClass} ${mobileClass} desktop:flex sticky top-0 z-20 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-[#1a2632] transition-all duration-300">
                     <div class="w-10 md:w-20 shrink-0 border-r border-slate-200 dark:border-slate-800"></div> 
-                    <div class="flex-1 grid grid-cols-7 divide-x divide-slate-200 dark:divide-slate-800">
+                    <div class="flex-1 flex divide-x divide-slate-200 dark:divide-slate-800">
                         ${this.days.map((day, i) => {
                             const dateObj = this.weekDates[i];
                             const isSelected = this.isToday(dateObj);
@@ -329,7 +356,7 @@ class ReservationSchedule {
                             const numClass = isSelected ? 'text-primary' : (day === 'sat' || day === 'sun' ? 'text-slate-500 dark:text-slate-400' : 'text-slate-700 dark:text-slate-200');
                             
                             return `
-                                <div class="py-2 md:p-3 text-center ${bgClass}">
+                                <div class="flex-1 py-2 md:p-3 text-center ${bgClass}">
                                     <p class="text-xs font-medium ${textClass} uppercase">${dayNames[day]}</p>
                                     <p class="text-sm md:text-lg font-bold ${numClass}">${dateObj.getDate()}</p>
                                 </div>
