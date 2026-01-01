@@ -30,8 +30,15 @@ class ReservationSchedule {
         this.render();
 
         // Add resize listener for responsive updates
+        // Add resize listener for responsive updates
         let resizeTimeout;
+        this.lastWidth = window.innerWidth; // Track width to ignore vertical-only resizes (mobile URL bar)
+        
         window.addEventListener('resize', () => {
+            const currentWidth = window.innerWidth;
+            if (currentWidth === this.lastWidth) return; // Ignore height-only changes
+            this.lastWidth = currentWidth;
+
             clearTimeout(resizeTimeout);
             resizeTimeout = setTimeout(() => {
                 this.render();
