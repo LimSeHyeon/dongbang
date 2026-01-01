@@ -949,7 +949,14 @@ async function loadModal(url, callback) {
         }
 
         document.body.appendChild(modalContainer);
-        if (callback) callback(modalContainer, () => modalContainer.remove());
+        document.body.style.overflow = 'hidden'; // Prevent background scrolling
+
+        const closeFunc = () => {
+            document.body.style.overflow = ''; // Restore scrolling
+            modalContainer.remove();
+        };
+
+        if (callback) callback(modalContainer, closeFunc);
 
     } catch (error) {
          console.error('Error loading modal:', error);
