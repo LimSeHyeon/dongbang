@@ -546,6 +546,15 @@ function setupReservationSubmit() {
                     return;
                 }
 
+                // Check Overlap (Client-side) - Updated to "Fully Occupied" check
+                const reqStart = parseInt(hour) + (parseInt(minute) / 60);
+                const reqEnd = reqStart + duration;
+
+                if (checkFullyOccupied(state.reservations, day, reqStart, reqEnd)) {
+                    alert('선택하신 시간은 이미 예약으로 꽉 차 있어 예약할 수 없습니다.');
+                    return;
+                }
+
                 // Calculate Date
                 const targetDate = getNextDayOfWeek(day, hour, minute);
                 const dateStr = formatDate(targetDate); // YYYY-MM-DD HH:mm:ss
@@ -697,6 +706,16 @@ function setupAdminInteractions() {
                  
                  if (parseFloat(durationVal) % 0.5 !== 0) {
                      alert('30분 단위로만 예약 가능합니다');
+                     return;
+                 }
+                 
+                 // Check Overlap (Client-side)
+                 const [reqH, reqM] = timeVal.split(':').map(Number);
+                 const reqStart = reqH + (reqM / 60);
+                 const reqEnd = reqStart + parseFloat(durationVal);
+
+                 if (checkFullyOccupied(state.reservations, dayVal, reqStart, reqEnd)) {
+                     alert('선택하신 시간은 이미 예약으로 꽉 차 있어 예약할 수 없습니다.');
                      return;
                  }
                  
