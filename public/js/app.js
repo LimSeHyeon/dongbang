@@ -306,8 +306,11 @@ function createMobileReservationElement(data) {
     
     // Style matches desktop colors roughly but as a list item
     let colorClasses = '';
-    if (data.colorClass === 'purple') colorClasses = 'bg-purple-50 dark:bg-purple-900/20 border-l-4 border-purple-500';
-    else if (data.colorClass === 'blue') colorClasses = 'bg-blue-50 dark:bg-blue-900/20 border-l-4 border-blue-500';
+
+    // Sage Green for Members -> Jul Light/Medium
+    if (data.colorClass === 'purple') colorClasses = 'bg-jul-light/30 dark:bg-jul-light/10 border-l-4 border-jul-medium';
+    // Rose Pink for Admin -> Jul Medium/Dark
+    else if (data.colorClass === 'blue') colorClasses = 'bg-jul-medium/20 dark:bg-jul-medium/10 border-l-4 border-jul-dark';
     else if (data.colorClass === 'emerald') colorClasses = 'bg-emerald-50 dark:bg-emerald-900/20 border-l-4 border-emerald-500';
     else if (data.colorClass === 'orange') colorClasses = 'bg-orange-50 dark:bg-orange-900/20 border-l-4 border-orange-500';
 
@@ -328,14 +331,11 @@ function createMobileReservationElement(data) {
                 ${data.startTime} - ${endTimeStr} (${data.duration}h)
             </p>
         </div>
-        ${data.isAdminViewOnly ? '' : '<span class="material-symbols-outlined text-slate-300">chevron_right</span>'}
+        ${data.isAdminViewOnly ? '' : '<span class="material-symbols-outlined text-jul-medium/50">chevron_right</span>'}
     `;
 
     return div;
 }
-
-
-
 
 const START_HOUR = 8;
 const HOUR_HEIGHT_REM = 3.5;
@@ -348,10 +348,21 @@ function createReservationElement(data, isAdmin) {
     const heightRem = data.duration * HOUR_HEIGHT_REM;
 
     let colorClasses = '';
-    if (data.colorClass === 'purple') colorClasses = 'bg-purple-100 dark:bg-purple-900/60 border-l-4 border-purple-500 text-purple-900 dark:text-purple-100';
-    else if (data.colorClass === 'blue') colorClasses = 'bg-blue-100 hover:bg-blue-200 dark:bg-blue-600/20 dark:hover:bg-blue-600/30 border-l-4 border-blue-500 text-blue-700 dark:text-blue-200';
-    else if (data.colorClass === 'emerald') colorClasses = 'bg-emerald-100 hover:bg-emerald-200 dark:bg-emerald-600/20 dark:hover:bg-emerald-600/30 border-l-4 border-emerald-500 text-emerald-700 dark:text-emerald-200';
-    else if (data.colorClass === 'orange') colorClasses = 'bg-orange-100 hover:bg-orange-200 dark:bg-orange-600/20 dark:hover:bg-orange-600/30 border-l-4 border-orange-500 text-orange-700 dark:text-orange-200';
+    // 일반 부원 (Purple Key -> Jul Light)
+    if (data.colorClass === 'purple') {
+        colorClasses = 'bg-jul-light hover:bg-jul-light/90 dark:bg-jul-light/20 border-l-4 border-jul-medium text-jul-dark dark:text-jul-light';
+    }
+    // 관리자 (Blue Key -> Jul Medium)
+    else if (data.colorClass === 'blue') {
+        colorClasses = 'bg-jul-medium hover:bg-jul-medium/90 dark:bg-jul-medium/40 border-l-4 border-jul-dark text-white dark:text-white';
+    }
+    // 기타 (유지)
+    else if (data.colorClass === 'emerald') {
+        colorClasses = 'bg-emerald-100 hover:bg-emerald-200 dark:bg-emerald-600/20 dark:hover:bg-emerald-600/30 border-l-4 border-emerald-500 text-emerald-700 dark:text-emerald-200';
+    }
+    else if (data.colorClass === 'orange') {
+        colorClasses = 'bg-orange-100 hover:bg-orange-200 dark:bg-orange-600/20 dark:hover:bg-orange-600/30 border-l-4 border-orange-500 text-orange-700 dark:text-orange-200';
+    }
 
     div.className = `absolute left-1 right-1 rounded p-2 shadow-sm cursor-pointer hover:shadow-md transition-shadow group overflow-hidden ${colorClasses} js-reservation-card`;
     div.style.top = `${topRem}rem`;
@@ -444,7 +455,7 @@ async function setupDynamicDuration() {
             if (time === defaultTime) input.checked = true;
 
             const div = document.createElement('div');
-            div.className = 'px-4 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-[#232d38] text-sm font-medium text-slate-600 dark:text-slate-300 peer-checked:bg-primary peer-checked:text-white peer-checked:border-primary hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors';
+            div.className = 'px-4 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-[#232d38] text-sm font-medium text-slate-600 dark:text-slate-300 peer-checked:bg-primary peer-checked:text-slate-900 peer-checked:border-primary hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors';
             div.innerText = labelText;
 
             label.appendChild(input);
@@ -470,7 +481,7 @@ function setupFormInteractions() {
                     b.className = 'h-9 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 text-xs font-medium transition-colors';
                     b.removeAttribute('data-active');
                 });
-                btn.className = 'h-9 rounded-lg bg-primary text-white text-xs font-semibold shadow-sm transition-transform active:scale-95';
+                btn.className = 'h-9 rounded-lg bg-primary text-slate-900 text-xs font-semibold shadow-sm transition-transform active:scale-95';
                 btn.setAttribute('data-active', 'true');
             });
         });
@@ -486,7 +497,7 @@ function setupFormInteractions() {
                     b.className = 'flex-1 rounded text-xs font-medium text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 py-1.5 transition-all';
                     b.removeAttribute('data-active');
                 });
-                btn.className = 'flex-1 rounded bg-white dark:bg-[#232d38] shadow-sm text-xs font-semibold text-primary py-1.5 transition-all';
+                btn.className = 'flex-1 rounded bg-white dark:bg-[#232d38] shadow-sm text-xs font-semibold text-slate-900 py-1.5 transition-all';
                 btn.setAttribute('data-active', 'true');
             });
         });
@@ -635,7 +646,7 @@ function setupAdminInteractions() {
                     b.className = 'h-9 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 text-xs font-medium transition-colors';
                     b.removeAttribute('data-active');
                 });
-                btn.className = 'h-9 rounded-lg bg-primary text-white text-xs font-semibold shadow-sm transition-transform active:scale-95';
+                btn.className = 'h-9 rounded-lg bg-primary text-slate-900 text-xs font-semibold shadow-sm transition-transform active:scale-95';
                 btn.setAttribute('data-active', 'true');
             });
         });
@@ -651,7 +662,7 @@ function setupAdminInteractions() {
                     b.className = 'flex-1 rounded text-xs font-medium text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 py-1.5 transition-all';
                     b.removeAttribute('data-active');
                 });
-                btn.className = 'flex-1 rounded bg-white dark:bg-[#232d38] shadow-sm text-xs font-semibold text-primary py-1.5 transition-all';
+                btn.className = 'flex-1 rounded bg-white dark:bg-[#232d38] shadow-sm text-xs font-semibold text-slate-900 py-1.5 transition-all';
                 btn.setAttribute('data-active', 'true');
             });
         });
