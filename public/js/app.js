@@ -49,6 +49,11 @@ function init() {
         fetchReservations();
         setupIndexInteractions();
     }
+    
+    // Cleanup any lingering modals (e.g. from BFCache when navigating back)
+    const existingModals = document.querySelectorAll('.modal-wrapper');
+    existingModals.forEach(m => m.remove());
+    document.body.style.overflow = '';
 }
 
 let isOpeningMobileModal = false;
@@ -1062,6 +1067,7 @@ function setupLoginModal(modalContainer, closeModal, isPageGate = false) {
                              setupAdminInteractions();
                          } else {
                              window.location.href = 'admin.html';
+                             closeModal(); // Close modal to prevent it from reappearing on back navigation (BFCache)
                          }
                      } else {
                          alert(data.message || '로그인 실패');
