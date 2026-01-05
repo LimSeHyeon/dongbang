@@ -51,10 +51,17 @@ function init() {
     }
 }
 
-function handleMobileDayClick(date) {
-    loadModal('mobileDayModal.html', (container, close) => {
-        setupMobileDayModal(container, close, date);
-    });
+let isOpeningMobileModal = false;
+async function handleMobileDayClick(date) {
+    if (isOpeningMobileModal) return;
+    isOpeningMobileModal = true;
+    try {
+        await loadModal('mobileDayModal.html', (container, close) => {
+            setupMobileDayModal(container, close, date);
+        });
+    } finally {
+        isOpeningMobileModal = false;
+    }
 }
 
 function setupMobileDayModal(modalContainer, closeModal, initialDate) {
@@ -376,8 +383,14 @@ function createReservationElement(data, isAdmin) {
 function setupIndexInteractions() {
     const adminBtn = document.getElementById('admin-btn');
     if (adminBtn) {
-        adminBtn.addEventListener('click', () => {
-            loadModal('adminLoginModal.html', setupLoginModal);
+        adminBtn.addEventListener('click', async () => {
+            if (adminBtn.disabled) return;
+            adminBtn.disabled = true;
+            try {
+                await loadModal('adminLoginModal.html', setupLoginModal);
+            } finally {
+                adminBtn.disabled = false;
+            }
         });
     }
 
@@ -486,63 +499,70 @@ function setupReservationSubmit() {
 
     if (realSubmitBtn) {
         realSubmitBtn.addEventListener('click', async () => {
-            // Gather Data
-            // Activity Input
-            const activityInput = document.querySelector('aside input[type="text"]');
-            const songName = activityInput ? activityInput.value : '';
-            
-            // Day
-            const activeDayBtn = document.querySelector('#day-selector button[data-active="true"]');
-            const day = activeDayBtn ? activeDayBtn.getAttribute('data-day') : null;
-            
-            // Time
-            const hourSelect = document.querySelector('aside select');
-            const hour = hourSelect ? hourSelect.value : null;
-
-            const activeMinuteBtn = document.querySelector('#minute-selector button[data-active="true"]');
-            const minute = activeMinuteBtn ? activeMinuteBtn.getAttribute('data-minute') : '00';
-
-            // Duration - UPDATED LOGIC
-            const checkedDuration = document.querySelector('input[name="duration"]:checked');
-            let duration = 1.0;
-            if (checkedDuration) {
-                duration = parseFloat(checkedDuration.value);
-            }
-
-            if (!songName) {
-                alert('활동명(곡명)을 입력해주세요.');
-                return;
-            }
-            if (!day) {
-                alert('요일을 선택해주세요.');
-                return;
-            }
-
-            // Calculate Date
-            const targetDate = getNextDayOfWeek(day, hour, minute);
-            const dateStr = formatDate(targetDate); // YYYY-MM-DD HH:mm:ss
+            if (realSubmitBtn.disabled) return;
+            realSubmitBtn.disabled = true;
 
             try {
-                const response = await fetch(`${API_BASE_URL}/reserve`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        songName: songName,
-                        startTime: dateStr,
-                        hapjuTerm: duration
-                    })
-                });
+                // Gather Data
+                // Activity Input
+                const activityInput = document.querySelector('aside input[type="text"]');
+                const songName = activityInput ? activityInput.value : '';
+                
+                // Day
+                const activeDayBtn = document.querySelector('#day-selector button[data-active="true"]');
+                const day = activeDayBtn ? activeDayBtn.getAttribute('data-day') : null;
+                
+                // Time
+                const hourSelect = document.querySelector('aside select');
+                const hour = hourSelect ? hourSelect.value : null;
 
-                const resData = await response.json();
-                if (resData.isSuccess) {
-                    alert('예약이 요청되었습니다! 곧 표시됩니다.');
-                    fetchReservations(); // Refresh
-                } else {
-                    alert('예약 실패: ' + resData.message);
+                const activeMinuteBtn = document.querySelector('#minute-selector button[data-active="true"]');
+                const minute = activeMinuteBtn ? activeMinuteBtn.getAttribute('data-minute') : '00';
+
+                // Duration - UPDATED LOGIC
+                const checkedDuration = document.querySelector('input[name="duration"]:checked');
+                let duration = 1.0;
+                if (checkedDuration) {
+                    duration = parseFloat(checkedDuration.value);
                 }
-            } catch (err) {
-                console.error(err);
-                alert('예약 제출 중 오류가 발생했습니다.');
+
+                if (!songName) {
+                    alert('활동명(곡명)을 입력해주세요.');
+                    return;
+                }
+                if (!day) {
+                    alert('요일을 선택해주세요.');
+                    return;
+                }
+
+                // Calculate Date
+                const targetDate = getNextDayOfWeek(day, hour, minute);
+                const dateStr = formatDate(targetDate); // YYYY-MM-DD HH:mm:ss
+
+                try {
+                    const response = await fetch(`${API_BASE_URL}/reserve`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            songName: songName,
+                            startTime: dateStr,
+                            hapjuTerm: duration
+                        })
+                    });
+
+                    const resData = await response.json();
+                    if (resData.isSuccess) {
+                        alert('예약이 요청되었습니다! 곧 표시됩니다.');
+                        fetchReservations(); // Refresh
+                    } else {
+                        alert('예약 실패: ' + resData.message);
+                    }
+                } catch (err) {
+                    console.error(err);
+                    alert('예약 제출 중 오류가 발생했습니다.');
+                }
+            } finally {
+                realSubmitBtn.disabled = false;
             }
         });
     }
@@ -641,88 +661,95 @@ function setupAdminInteractions() {
     const adminReserveBtn = document.getElementById('admin-reserve-btn');
     if (adminReserveBtn) {
         adminReserveBtn.addEventListener('click', async () => {
-             const songName = document.getElementById('admin-reserve-song').value;
-             
-             // Get Day from new selector
-             const activeDayBtn = document.querySelector('#admin-day-selector button[data-active="true"]');
-             const dayVal = activeDayBtn ? activeDayBtn.getAttribute('data-day') : null;
+            if (adminReserveBtn.disabled) return;
+            adminReserveBtn.disabled = true;
 
-             // Get Time from new selector
-             const hourVal = document.getElementById('admin-reserve-hour').value;
-             const activeMinuteBtn = document.querySelector('#admin-minute-selector button[data-active="true"]');
-             const minuteVal = activeMinuteBtn ? activeMinuteBtn.getAttribute('data-minute') : '00';
-             
-             const timeVal = `${hourVal}:${minuteVal}`;
-             const durationVal = document.getElementById('admin-reserve-duration').value;
+            try {
+                 const songName = document.getElementById('admin-reserve-song').value;
+                 
+                 // Get Day from new selector
+                 const activeDayBtn = document.querySelector('#admin-day-selector button[data-active="true"]');
+                 const dayVal = activeDayBtn ? activeDayBtn.getAttribute('data-day') : null;
 
-             if (!songName || !dayVal || !timeVal || !durationVal) {
-                 alert('모든 예약 정보를 입력해주세요.');
-                 return;
-             }
-             
-             if (parseFloat(durationVal) % 0.5 !== 0) {
-                 alert('30분 단위로만 예약 가능합니다');
-                 return;
-             }
-             
-             // Calculate Target Date for "dayVal" based on current week
-             // Assumes reservation is for the *current* displayed week or next occurrence?
-             // Usually "Next occurrence of Day" logic.
-             
-             // Reuse getNextDayOfWeek logic or similar
-             const now = new Date();
-             const days = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
-             const targetDayIndex = days.indexOf(dayVal); // 0=sun...
-             
-             let targetDate = new Date();
-             // If we have access to schedule start date, use it?
-             if (state.reservationSchedule && typeof state.reservationSchedule.getMondayDate === 'function') {
-                  const monday = state.reservationSchedule.getMondayDate();
-                  const dayMap = { 'mon':0, 'tue':1, 'wed':2, 'thu':3, 'fri':4, 'sat':5, 'sun':6 };
-                  const targetDayOffset = dayMap[dayVal]; // 0-6 relative to Monday
-                  
-                  targetDate = new Date(monday);
-                  targetDate.setDate(monday.getDate() + targetDayOffset);
-             } else {
-                 // Fallback
-                  const currentDay = now.getDay();
-                  let diff = targetDayIndex - currentDay;
-                  if (diff < 0) diff += 7; // Next occurrence
-                  targetDate.setDate(now.getDate() + diff);
-             }
-             
-             const [hh, mm] = timeVal.split(':').map(Number);
-             targetDate.setHours(hh, mm, 0, 0);
+                 // Get Time from new selector
+                 const hourVal = document.getElementById('admin-reserve-hour').value;
+                 const activeMinuteBtn = document.querySelector('#admin-minute-selector button[data-active="true"]');
+                 const minuteVal = activeMinuteBtn ? activeMinuteBtn.getAttribute('data-minute') : '00';
+                 
+                 const timeVal = `${hourVal}:${minuteVal}`;
+                 const durationVal = document.getElementById('admin-reserve-duration').value;
 
-             const pad = (n) => n.toString().padStart(2, '0');
-             const startTimeStr = `${targetDate.getFullYear()}-${pad(targetDate.getMonth()+1)}-${pad(targetDate.getDate())} ${pad(targetDate.getHours())}:${pad(targetDate.getMinutes())}:00`;
+                 if (!songName || !dayVal || !timeVal || !durationVal) {
+                     alert('모든 예약 정보를 입력해주세요.');
+                     return;
+                 }
+                 
+                 if (parseFloat(durationVal) % 0.5 !== 0) {
+                     alert('30분 단위로만 예약 가능합니다');
+                     return;
+                 }
+                 
+                 // Calculate Target Date for "dayVal" based on current week
+                 // Assumes reservation is for the *current* displayed week or next occurrence?
+                 // Usually "Next occurrence of Day" logic.
+                 
+                 // Reuse getNextDayOfWeek logic or similar
+                 const now = new Date();
+                 const days = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
+                 const targetDayIndex = days.indexOf(dayVal); // 0=sun...
+                 
+                 let targetDate = new Date();
+                 // If we have access to schedule start date, use it?
+                 if (state.reservationSchedule && typeof state.reservationSchedule.getMondayDate === 'function') {
+                      const monday = state.reservationSchedule.getMondayDate();
+                      const dayMap = { 'mon':0, 'tue':1, 'wed':2, 'thu':3, 'fri':4, 'sat':5, 'sun':6 };
+                      const targetDayOffset = dayMap[dayVal]; // 0-6 relative to Monday
+                      
+                      targetDate = new Date(monday);
+                      targetDate.setDate(monday.getDate() + targetDayOffset);
+                 } else {
+                     // Fallback
+                      const currentDay = now.getDay();
+                      let diff = targetDayIndex - currentDay;
+                      if (diff < 0) diff += 7; // Next occurrence
+                      targetDate.setDate(now.getDate() + diff);
+                 }
+                 
+                 const [hh, mm] = timeVal.split(':').map(Number);
+                 targetDate.setHours(hh, mm, 0, 0);
 
-             try {
-                // Use Admin-specific endpoint
-                const response = await fetch(`${API_BASE_URL}/admin/reserve`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        songName,
-                        startTime: startTimeStr,
-                        hapjuTerm: parseFloat(durationVal),
-                        isAdmin: true 
-                    })
-                });
-                
-                const data = await response.json();
-                if (data.isSuccess) {
-                    alert('관리자 예약이 등록되었습니다.');
-                    fetchReservations();
-                    // Reset form
-                    document.getElementById('admin-reserve-song').value = '';
-                } else {
-                    alert('예약 등록 실패: ' + data.message);
-                }
-             } catch(err) {
-                 console.error(err);
-                 alert('오류 발생');
-             }
+                 const pad = (n) => n.toString().padStart(2, '0');
+                 const startTimeStr = `${targetDate.getFullYear()}-${pad(targetDate.getMonth()+1)}-${pad(targetDate.getDate())} ${pad(targetDate.getHours())}:${pad(targetDate.getMinutes())}:00`;
+
+                 try {
+                    // Use Admin-specific endpoint
+                    const response = await fetch(`${API_BASE_URL}/admin/reserve`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            songName,
+                            startTime: startTimeStr,
+                            hapjuTerm: parseFloat(durationVal),
+                            isAdmin: true 
+                        })
+                    });
+                    
+                    const data = await response.json();
+                    if (data.isSuccess) {
+                        alert('관리자 예약이 등록되었습니다.');
+                        fetchReservations();
+                        // Reset form
+                        document.getElementById('admin-reserve-song').value = '';
+                    } else {
+                        alert('예약 등록 실패: ' + data.message);
+                    }
+                 } catch(err) {
+                     console.error(err);
+                     alert('오류 발생');
+                 }
+            } finally {
+                adminReserveBtn.disabled = false;
+            }
         });
     }
 
@@ -744,50 +771,56 @@ function setupSaveSettings() {
     const saveBtn = document.getElementById('save-setting-btn');
     if (saveBtn) {
         saveBtn.addEventListener('click', async () => {
-            const dayInput = document.getElementById('setting-open-day').value;
-            const timeInput = document.getElementById('setting-open-time').value;
-            const maxInput = document.getElementById('setting-max-time').value;
-
-            // Simple parsing
-            let openWeekday = parseInt(dayInput);
-            if (isNaN(openWeekday)) openWeekday = 3; 
-
-            let openTime = parseInt(timeInput.split(':')[0]);
-            if (isNaN(openTime)) openTime = 9;
-
-            let maxUseTime = parseFloat(maxInput); 
-            
-            if (isNaN(maxUseTime)) {
-                alert("올바른 수를 입력해주세요.");
-                return;
-            }
-
-            if (maxUseTime % 0.5 !== 0) {
-                alert("정수 혹은 .5로 끝나는 수를 입력해주세요. (예: 1.5, 2.0)");
-                return;
-            }
-
+            if (saveBtn.disabled) return;
+            saveBtn.disabled = true;
             try {
-                const response = await fetch(`${API_BASE_URL}/admin/setting`, {
-                    method: 'PATCH',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        openWeekday,
-                        openTime,
-                        maxUseTime
-                    })
-                });
+                const dayInput = document.getElementById('setting-open-day').value;
+                const timeInput = document.getElementById('setting-open-time').value;
+                const maxInput = document.getElementById('setting-max-time').value;
+
+                // Simple parsing
+                let openWeekday = parseInt(dayInput);
+                if (isNaN(openWeekday)) openWeekday = 3; 
+
+                let openTime = parseInt(timeInput.split(':')[0]);
+                if (isNaN(openTime)) openTime = 9;
+
+                let maxUseTime = parseFloat(maxInput); 
                 
-                const data = await response.json();
-                if (data.isSuccess) {
-                    alert('설정이 저장되었습니다!');
-                    fetchAdminSettings(); // Refresh
-                } else {
-                    alert('설정 저장 실패: ' + data.message);
+                if (isNaN(maxUseTime)) {
+                    alert("올바른 수를 입력해주세요.");
+                    return;
                 }
-            } catch (err) {
-                console.error(err);
-                alert('설정 저장 중 오류가 발생했습니다.');
+
+                if (maxUseTime % 0.5 !== 0) {
+                    alert("정수 혹은 .5로 끝나는 수를 입력해주세요. (예: 1.5, 2.0)");
+                    return;
+                }
+
+                try {
+                    const response = await fetch(`${API_BASE_URL}/admin/setting`, {
+                        method: 'PATCH',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            openWeekday,
+                            openTime,
+                            maxUseTime
+                        })
+                    });
+                    
+                    const data = await response.json();
+                    if (data.isSuccess) {
+                        alert('설정이 저장되었습니다!');
+                        fetchAdminSettings(); // Refresh
+                    } else {
+                        alert('설정 저장 실패: ' + data.message);
+                    }
+                } catch (err) {
+                    console.error(err);
+                    alert('설정 저장 중 오류가 발생했습니다.');
+                }
+            } finally {
+                saveBtn.disabled = false;
             }
         });
     }
@@ -976,32 +1009,39 @@ function setupLoginModal(modalContainer, closeModal, isPageGate = false) {
 
     if (loginBtn && passwordInput) {
         loginBtn.addEventListener('click', async () => {
-             const password = passwordInput.value;
+             if (loginBtn.disabled) return;
+             loginBtn.disabled = true;
+             
              try {
-                 const res = await fetch(`${API_BASE_URL}/admin`, {
-                     method: 'POST',
-                     headers: {'Content-Type': 'application/json'},
-                     body: JSON.stringify({ password })
-                 });
-                 const data = await res.json();
-                 
-                 if (data.isSuccess) {
-                     sessionStorage.setItem('adminAuthenticated', 'true');
-                     localStorage.setItem('adminPassword', password); 
+                 const password = passwordInput.value;
+                 try {
+                     const res = await fetch(`${API_BASE_URL}/admin`, {
+                         method: 'POST',
+                         headers: {'Content-Type': 'application/json'},
+                         body: JSON.stringify({ password })
+                     });
+                     const data = await res.json();
                      
-                     if (isPageGate) {
-                         closeModal();
-                         fetchReservations();
-                         setupAdminInteractions();
+                     if (data.isSuccess) {
+                         sessionStorage.setItem('adminAuthenticated', 'true');
+                         localStorage.setItem('adminPassword', password); 
+                         
+                         if (isPageGate) {
+                             closeModal();
+                             fetchReservations();
+                             setupAdminInteractions();
+                         } else {
+                             window.location.href = 'admin.html';
+                         }
                      } else {
-                         window.location.href = 'admin.html';
+                         alert(data.message || '로그인 실패');
                      }
-                 } else {
-                     alert(data.message || '로그인 실패');
+                 } catch(err) {
+                     console.error(err);
+                     alert('서버 연결 오류.');
                  }
-             } catch(err) {
-                 console.error(err);
-                 alert('서버 연결 오류.');
+             } finally {
+                 loginBtn.disabled = false;
              }
         });
 
@@ -1079,24 +1119,31 @@ function setupDeleteModal(modalContainer, closeModal, reservationId) {
 
     if (deleteBtn) {
         deleteBtn.addEventListener('click', async () => {
+            if (deleteBtn.disabled) return;
+            deleteBtn.disabled = true;
+
             try {
-                const res = await fetch(`${API_BASE_URL}/reserve?reservationId=${reservationId}`, {
-                    method: 'DELETE'
-                });
-                const data = await res.json();
-                
-                if (data.isSuccess) {
-                    const card = document.querySelector(`.js-reservation-card[data-id="${reservationId}"]`);
-                    if (card) card.remove();
-                    // Also remove from state to match UI
-                    state.reservations = state.reservations.filter(r => r.id != reservationId);
-                    closeModal();
-                } else {
-                    alert('삭제 실패: ' + data.message);
+                try {
+                    const res = await fetch(`${API_BASE_URL}/reserve?reservationId=${reservationId}`, {
+                        method: 'DELETE'
+                    });
+                    const data = await res.json();
+                    
+                    if (data.isSuccess) {
+                        const card = document.querySelector(`.js-reservation-card[data-id="${reservationId}"]`);
+                        if (card) card.remove();
+                        // Also remove from state to match UI
+                        state.reservations = state.reservations.filter(r => r.id != reservationId);
+                        closeModal();
+                    } else {
+                        alert('삭제 실패: ' + data.message);
+                    }
+                } catch(err) {
+                    console.error(err);
+                    alert('예약 삭제 중 오류가 발생했습니다.');
                 }
-            } catch(err) {
-                console.error(err);
-                alert('예약 삭제 중 오류가 발생했습니다.');
+            } finally {
+                deleteBtn.disabled = false;
             }
         });
     }
