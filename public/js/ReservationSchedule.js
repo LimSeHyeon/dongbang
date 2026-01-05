@@ -262,13 +262,27 @@ class ReservationSchedule {
                             <span class="material-symbols-outlined">chevron_right</span>
                         </button>
                     </div>
-                    <div class="flex items-center justify-between md:justify-end gap-4 md:gap-6 w-full md:w-auto">
-                         <div class="flex items-center gap-4 text-xs font-medium text-slate-500 dark:text-slate-400">
-                            <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-jul-medium dark:bg-jul-medium/60 border border-jul-dark"></span><span class="hidden md:inline">관리자</span></div>
-                            <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-jul-light dark:bg-jul-light/60 border border-jul-medium"></span><span class="hidden md:inline">부원</span></div>
+                    <div class="flex items-center justify-between md:justify-end gap-2 w-full md:w-auto">
+                        <div class="flex items-center gap-2">
+                             <!-- Toggle Button -->
+                             <button id="view-mode-toggle" class="h-9 w-9 flex items-center justify-center rounded-lg bg-primary text-slate-900 hover:bg-primary/90 transition-colors" title="보기 모드 변경">
+                                <span class="material-symbols-outlined text-[20px]">${this.mobileViewMode === 'list' ? 'grid_view' : 'view_list'}</span>
+                            </button>
+                            
+                            <!-- Refresh -->
+                            <button id="refresh-btn" class="h-9 w-9 flex items-center justify-center mx-1 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 dark:text-slate-400 transition-colors" title="새로고침">
+                                <span class="material-symbols-outlined text-[20px]">refresh</span>
+                            </button>
+                            
+                            <!-- Today -->
+                            <button data-action="today" class="h-9 px-4 flex items-center justify-center text-xs font-bold text-slate-900 bg-primary rounded-lg whitespace-nowrap hover:bg-primary/90 transition-colors">오늘</button>
                         </div>
-                        <div class="hidden md:block w-px h-4 bg-slate-200 dark:bg-slate-700"></div>
-                        <button data-action="today" class="h-8 md:h-9 px-3 flex items-center justify-center hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg text-slate-500 text-sm font-medium transition-colors border border-slate-200 md:border-transparent dark:border-slate-700">오늘</button>
+                        
+                        <!-- Legend -->
+                        <div class="flex items-center gap-4 ml-2 md:ml-4 text-xs font-medium text-slate-500 dark:text-slate-400">
+                            <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-jul-medium dark:bg-jul-medium/60 border border-jul-dark"></span><span class="hidden sm:inline">관리자</span></div>
+                            <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-jul-light dark:bg-jul-light/60 border border-jul-medium"></span><span class="hidden sm:inline">부원</span></div>
+                        </div>
                     </div>
                 </div>
             `;
