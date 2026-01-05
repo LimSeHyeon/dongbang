@@ -355,11 +355,11 @@ function createReservationElement(data, isAdmin) {
     let colorClasses = '';
     // 일반 부원 (Purple Key -> Jul Light)
     if (data.colorClass === 'purple') {
-        colorClasses = 'bg-jul-light hover:bg-jul-light/90 dark:bg-jul-light/20 border-l-4 border-jul-medium text-jul-dark dark:text-jul-light';
+        colorClasses = 'bg-jul-light hover:bg-jul-light/90 dark:bg-jul-light/20 border-l-4 border-jul-dark text-white dark:text-jul-medium';
     }
     // 관리자 (Blue Key -> Jul Medium)
     else if (data.colorClass === 'blue') {
-        colorClasses = 'bg-jul-medium hover:bg-jul-medium/90 dark:bg-jul-medium/40 border-l-4 border-jul-dark text-white dark:text-white';
+        colorClasses = 'bg-jul-medium hover:bg-jul-medium/90 dark:bg-jul-medium/40 border-l-4 border-jul-light text-jul-dark dark:text-white';
     }
     // 기타 (유지)
     else if (data.colorClass === 'emerald') {
@@ -371,7 +371,7 @@ function createReservationElement(data, isAdmin) {
 
     div.className = `absolute left-1 right-1 rounded p-2 shadow-sm cursor-pointer hover:shadow-md transition-shadow group overflow-hidden ${colorClasses} js-reservation-card`;
     div.style.top = `${topRem}rem`;
-    div.style.height = `${heightRem}rem`;
+    div.style.height = `calc(${heightRem}rem - 2px)`;
     div.setAttribute('data-id', data.id);
 
     const titleP = document.createElement('p');
