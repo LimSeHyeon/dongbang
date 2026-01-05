@@ -131,7 +131,7 @@ class ReservationSchedule {
                      return `
                         <div id="mobile-day-${day}" class="mobile-day-section cursor-pointer transition-transform active:scale-[0.99]" data-index="${i}">
                             <div class="flex items-center justify-between mb-2 pl-2 border-l-4 ${isToday ? 'border-primary' : 'border-slate-300'}">
-                                <h4 class="text-sm font-bold ${isToday ? 'text-primary' : 'text-slate-500'}">
+                                <h4 class="text-sm font-bold ${isToday ? 'text-slate-900 dark:text-white' : 'text-slate-500'}">
                                     ${dateStr} ${dayName}요일 ${isToday ? '(오늘)' : ''}
                                 </h4>
                                 <span class="material-symbols-outlined text-slate-300 text-sm">open_in_full</span>
@@ -235,7 +235,7 @@ class ReservationSchedule {
                                 const dateObj = this.weekDates[index];
                                 const isCurrentDate = this.isToday(dateObj);
                                 const isWeekend = day === 'sat' || day === 'sun';
-                                const bgClass = isCurrentDate ? 'bg-primary/5' : (isWeekend ? 'bg-slate-50/50 dark:bg-[#15202b]/50' : '');
+                                const bgClass = isCurrentDate ? 'bg-primary/20' : (isWeekend ? 'bg-slate-50/50 dark:bg-[#15202b]/50' : '');
                                 
                                 return `<div id="${colPrefix}${day}" class="relative flex-1 min-h-[896px] ${bgClass} group"></div>`;
                             }).join('')}
@@ -264,8 +264,8 @@ class ReservationSchedule {
                     </div>
                     <div class="flex items-center justify-between md:justify-end gap-4 md:gap-6 w-full md:w-auto">
                          <div class="flex items-center gap-4 text-xs font-medium text-slate-500 dark:text-slate-400">
-                            <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-blue-100 dark:bg-blue-900/30 border border-blue-400"></span><span class="hidden md:inline">관리자</span></div>
-                            <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-purple-100 dark:bg-purple-900/30 border border-purple-400"></span><span class="hidden md:inline">부원</span></div>
+                            <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-jul-medium dark:bg-jul-medium/60 border border-jul-dark"></span><span class="hidden md:inline">관리자</span></div>
+                            <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-jul-light dark:bg-jul-light/60 border border-jul-medium"></span><span class="hidden md:inline">부원</span></div>
                         </div>
                         <div class="hidden md:block w-px h-4 bg-slate-200 dark:bg-slate-700"></div>
                         <button data-action="today" class="h-8 md:h-9 px-3 flex items-center justify-center hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg text-slate-500 text-sm font-medium transition-colors border border-slate-200 md:border-transparent dark:border-slate-700">오늘</button>
@@ -287,18 +287,18 @@ class ReservationSchedule {
                     <div class="flex items-center justify-between md:justify-end gap-2 w-full md:w-auto">
                         <div class="flex items-center gap-2">
                             <!-- Toggle Button -->
-                            <button id="view-mode-toggle" class="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-primary dark:text-primary transition-colors" title="보기 모드 변경">
+                            <button id="view-mode-toggle" class="h-9 w-9 flex items-center justify-center rounded-lg bg-primary text-slate-900 hover:bg-primary/90 transition-colors" title="보기 모드 변경">
                                 <span class="material-symbols-outlined text-[20px]">${this.mobileViewMode === 'list' ? 'grid_view' : 'view_list'}</span>
                             </button>
                             
-                            <button id="refresh-btn" class="p-2 mr-1 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 dark:text-slate-400 transition-colors" title="새로고침">
+                            <button id="refresh-btn" class="h-9 w-9 flex items-center justify-center mx-1 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 dark:text-slate-400 transition-colors" title="새로고침">
                                 <span class="material-symbols-outlined text-[20px]">refresh</span>
                             </button>
-                            <button data-action="today" class="px-3 py-1.5 text-xs font-semibold text-primary bg-primary/10 rounded-lg whitespace-nowrap">오늘</button>
+                            <button data-action="today" class="h-9 px-4 flex items-center justify-center text-xs font-bold text-slate-900 bg-primary rounded-lg whitespace-nowrap hover:bg-primary/90 transition-colors">오늘</button>
                         </div>
                         <div class="flex items-center gap-4 ml-2 md:ml-4 text-xs font-medium text-slate-500 dark:text-slate-400">
-                            <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-primary/20 border border-primary"></span><span class="hidden sm:inline">일정</span></div>
-                            <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-purple-100 dark:bg-purple-900/30 border border-purple-400"></span><span class="hidden sm:inline">합주</span></div>
+                            <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-jul-medium dark:bg-jul-medium/60 border border-jul-dark"></span><span class="hidden sm:inline">일정</span></div>
+                            <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-jul-light dark:bg-jul-light/60 border border-jul-medium"></span><span class="hidden sm:inline">합주</span></div>
                         </div>
                     </div>
                 </div>
@@ -328,8 +328,8 @@ class ReservationSchedule {
                             const dateObj = this.weekDates[i];
                             const isSelected = this.isToday(dateObj);
                             
-                            const textClass = isSelected ? 'text-primary' : 'text-slate-500 dark:text-slate-400';
-                            const numClass = isSelected ? 'text-primary' : 'text-slate-700 dark:text-slate-200';
+                            const textClass = isSelected ? 'text-slate-900 dark:text-white' : 'text-slate-500 dark:text-slate-400';
+                            const numClass = isSelected ? 'text-slate-900 dark:text-white' : 'text-slate-700 dark:text-slate-200';
                             
                             return `
                                 <div class="flex-1 py-2 md:p-3 text-center">
@@ -351,9 +351,9 @@ class ReservationSchedule {
                             const dateObj = this.weekDates[i];
                             const isSelected = this.isToday(dateObj);
                             
-                            const textClass = isSelected ? 'text-primary' : 'text-slate-500 dark:text-slate-400';
-                            const bgClass = isSelected ? 'bg-primary/5' : (day === 'sat' || day === 'sun' ? 'bg-slate-50 dark:bg-[#15202b]' : '');
-                            const numClass = isSelected ? 'text-primary' : (day === 'sat' || day === 'sun' ? 'text-slate-500 dark:text-slate-400' : 'text-slate-700 dark:text-slate-200');
+                            const textClass = isSelected ? 'text-slate-900 dark:text-white' : 'text-slate-500 dark:text-slate-400';
+                            const bgClass = isSelected ? 'bg-primary' : (day === 'sat' || day === 'sun' ? 'bg-slate-50 dark:bg-[#15202b]' : '');
+                            const numClass = isSelected ? 'text-slate-900 dark:text-white' : (day === 'sat' || day === 'sun' ? 'text-slate-500 dark:text-slate-400' : 'text-slate-700 dark:text-slate-200');
                             
                             return `
                                 <div class="flex-1 py-2 md:p-3 text-center ${bgClass}">
