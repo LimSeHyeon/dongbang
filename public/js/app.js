@@ -564,6 +564,7 @@ function setupReservationSubmit() {
                 }
                 
                 const hasPartialOverlap = overlapStatus.hasPartialOverlap;
+                const availableIntervals = overlapStatus.availableIntervals;
 
                 // Calculate Date
                 const targetDate = getNextDayOfWeek(day, hour, minute);
@@ -582,8 +583,14 @@ function setupReservationSubmit() {
 
                     const resData = await response.json();
                     if (resData.isSuccess) {
-                        if (hasPartialOverlap) {
-                            alert('일부 겹치는 시간이 있습니다! 해당 시간은 제외하고 예약됩니다');
+                        if (hasPartialOverlap && availableIntervals) {
+                            const formatTime = (t) => {
+                                const h = Math.floor(t).toString().padStart(2, '0');
+                                const m = Math.round((t - Math.floor(t)) * 60).toString().padStart(2, '0');
+                                return `${h}:${m}`;
+                            };
+                            const intervalsStr = availableIntervals.map(inv => `${formatTime(inv.start)} ~ ${formatTime(inv.end)}`).join(', ');
+                            alert(`기존 예약 내역과 겹치는 시간이 있습니다! 해당 시간을 제외한 ${intervalsStr}만 예약합니다`);
                         } else {
                             alert('예약이 요청되었습니다! 곧 표시됩니다.');
                         }
@@ -736,6 +743,7 @@ function setupAdminInteractions() {
                  }
                  
                  const hasPartialOverlap = overlapStatus.hasPartialOverlap;
+                 const availableIntervals = overlapStatus.availableIntervals;
                  
                  // Calculate Target Date for "dayVal" based on current week
                  // Assumes reservation is for the *current* displayed week or next occurrence?
@@ -784,8 +792,14 @@ function setupAdminInteractions() {
                     
                     const data = await response.json();
                     if (data.isSuccess) {
-                        if (hasPartialOverlap) {
-                            alert('일부 겹치는 시간이 있습니다! 해당 시간은 제외하고 예약됩니다');
+                        if (hasPartialOverlap && availableIntervals) {
+                            const formatTime = (t) => {
+                                const h = Math.floor(t).toString().padStart(2, '0');
+                                const m = Math.round((t - Math.floor(t)) * 60).toString().padStart(2, '0');
+                                return `${h}:${m}`;
+                            };
+                            const intervalsStr = availableIntervals.map(inv => `${formatTime(inv.start)} ~ ${formatTime(inv.end)}`).join(', ');
+                            alert(`기존 예약 내역과 겹치는 시간이 있습니다! 해당 시간을 제외한 ${intervalsStr}만 예약합니다`);
                         } else {
                             alert('관리자 예약이 등록되었습니다.');
                         }

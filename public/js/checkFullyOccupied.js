@@ -26,7 +26,7 @@ function checkFullyOccupied(reservations, day, reqStart, reqEnd) {
     });
 
     if (intervals.length === 0) {
-        return { isFullyOccupied: false, hasPartialOverlap: false };
+        return { isFullyOccupied: false, hasPartialOverlap: false, availableIntervals: [{start: reqStart, end: reqEnd}] };
     }
 
     // 2. Merge overlapping intervals
@@ -46,11 +46,25 @@ function checkFullyOccupied(reservations, day, reqStart, reqEnd) {
     }
     merged.push(curr);
 
-    // 3. Sum duration
+    // 3. Sum duration & Calculate available intervals
+    const availableIntervals = [];
+    let currentStart = reqStart;
+    
+    merged.forEach(interval => {
+        if (interval.start > currentStart + 0.001) {
+            availableIntervals.push({start: currentStart, end: interval.start});
+        }
+        currentStart = Math.max(currentStart, interval.end);
+    });
+    
+    if (currentStart < reqEnd - 0.001) {
+        availableIntervals.push({start: currentStart, end: reqEnd});
+    }
+
     const occupiedDuration = merged.reduce((acc, cur) => acc + (cur.end - cur.start), 0);
     const reqDuration = reqEnd - reqStart;
 
     const isFullyOccupied = occupiedDuration >= (reqDuration - 0.001); // Float tolerance
 
-    return { isFullyOccupied, hasPartialOverlap: true };
+    return { isFullyOccupied, hasPartialOverlap: true, availableIntervals };
 }
