@@ -29,7 +29,7 @@ export const checkTime = async (req, res, next) => {
     const openDayVal = settingResult.open_weekday === 0 ? 7 : settingResult.open_weekday;
 
     const isAfterOpenDay = currentDayVal > openDayVal;
-    const isSameDayAfterTime = (currentDay === openDayVal && now.getHours() >= settingResult.open_time);
+    const isSameDayAfterTime = (currentDayVal === openDayVal && now.getHours() >= settingResult.open_time);
     console.log("isAfterOpenDay : ", isAfterOpenDay);
     console.log("isSameDayAfterTime : ", isSameDayAfterTime);
     if (isAfterOpenDay || isSameDayAfterTime) {
