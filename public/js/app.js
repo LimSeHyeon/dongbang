@@ -1173,6 +1173,9 @@ function setupDeleteModal(modalContainer, closeModal, reservationId, infoModalCl
                     // Close both modals
                     closeModal();
                     if (infoModalClose) infoModalClose();
+
+                    // Refresh to reflect on mobile day views and grid fully
+                    fetchReservations();
                 } else {
                     alert('삭제 실패: ' + data.message);
                 }
