@@ -6,6 +6,7 @@ class ReservationSchedule {
             showDates: false, // If true, shows the date numbers like index.html
             headerTitle: '', // Optional title override
             onWeekChange: null, // Callback when week changes
+            initialDateOffset: 0, // Offset in days to set the initial week
             ...options
         };
 
@@ -24,6 +25,10 @@ class ReservationSchedule {
         const day = this.currentDate.getDay(); // 0=Sun, 1=Mon...6=Sat
         // Our grid is [Mon, Tue, Wed, Thu, Fri, Sat, Sun] indices 0..6
         this.activeMobileTabIndex = day === 0 ? 6 : day - 1;
+        
+        if (this.options.initialDateOffset) {
+            this.currentDate.setDate(this.currentDate.getDate() + this.options.initialDateOffset);
+        }
         
         this.calculateWeekDates();
 

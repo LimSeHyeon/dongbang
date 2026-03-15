@@ -39,6 +39,7 @@ function init() {
         state.reservationSchedule = new ReservationSchedule('reservation-schedule', {
             isAdmin: false,
             showDates: true,
+            initialDateOffset: 7,
             onWeekChange: (newDate) => {
                 fetchReservations();
             },
