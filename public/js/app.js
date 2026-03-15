@@ -418,7 +418,7 @@ function setupIndexInteractions() {
             // Check if admin is logged in? For now anyone can click delete in UI, but API is delete default
             // User side deletion usually requires password or session. 
             // In this app, we just trigger the modal.
-            loadModal('deleteModal.html', (container, close) => setupDeleteModal(container, close, id));
+            loadModal('infoModal.html', (container, close) => setupInfoModal(container, close, id));
         }
     });
 
@@ -794,7 +794,7 @@ function setupAdminInteractions() {
         const card = e.target.closest('.js-reservation-card');
         if (card) {
             const id = card.getAttribute('data-id');
-            loadModal('deleteModal.html', (container, close) => setupDeleteModal(container, close, id));
+            loadModal('infoModal.html', (container, close) => setupInfoModal(container, close, id));
         }
     });
 
@@ -1102,85 +1102,85 @@ function setupLoginModal(modalContainer, closeModal, isPageGate = false) {
     }
 }
 
-function setupDeleteModal(modalContainer, closeModal, reservationId) {
-    const cancelBtn = Array.from(modalContainer.querySelectorAll('button')).find(b => b.innerText.includes('Cancel') || b.innerText.includes('취소'));
-    const deleteBtn = Array.from(modalContainer.querySelectorAll('button')).find(b => b.innerText.includes('Delete') || b.innerText.includes('삭제'));
-    
-    // Populate Data
+function setupInfoModal(modalContainer, closeModal, reservationId) {
     const reservation = state.reservations.find(r => r.id == reservationId);
-    if (reservation) {
-        // Find elements
-        // The structure is quite specific in deleteModal.html
-        const infoContainer = modalContainer.querySelector('.mt-6.rounded-lg');
-        if (infoContainer) {
-            const titleEl = infoContainer.querySelector('p.font-semibold');
-            if (titleEl) titleEl.innerText = reservation.title;
-
-            // Day and Time are in nested spans. 
-            // We can try to select them by icon proximity or structure.
-            const metaSpans = infoContainer.querySelectorAll('.text-xs span.flex.items-center.gap-1');
-            
-            // First span is Day (has calendar_today icon)
-            if (metaSpans[0]) {
-                const dayText = metaSpans[0].lastChild; // The text node after the icon span
-                if (dayText) dayText.textContent = reservation.day.charAt(0).toUpperCase() + reservation.day.slice(1);
-            }
-
-            // Second span is Time (has schedule icon)
-            if (metaSpans[1]) {
-                const timeText = metaSpans[1].lastChild;
-                
-                // Calculate end time
-                const [h, m] = reservation.startTime.split(':').map(Number);
-                const endTotal = h + (m/60) + reservation.duration;
-                const endH = Math.floor(endTotal);
-                const endM = Math.round((endTotal - endH) * 60);
-                const endTimeStr = `${String(endH).padStart(2, '0')}:${String(endM).padStart(2, '0')}`;
-                
-                if (timeText) timeText.textContent = `${reservation.startTime} - ${endTimeStr}`;
-            }
-        }
+    if (!reservation) {
+        closeModal();
+        return;
     }
 
-    const backdrop = modalContainer.querySelector('.backdrop-blur-sm');
+    const titleEl = modalContainer.querySelector('.info-title');
+    if (titleEl) titleEl.innerText = reservation.title;
+
+    const dayEl = modalContainer.querySelector('.info-day');
+    if (dayEl) {
+        const dayNamesKO = { 'mon': '월요일', 'tue': '화요일', 'wed': '수요일', 'thu': '목요일', 'fri': '금요일', 'sat': '토요일', 'sun': '일요일' };
+        dayEl.innerText = dayNamesKO[reservation.day] || reservation.day;
+    }
+
+    const timeEl = modalContainer.querySelector('.info-time');
+    if (timeEl) {
+        const [h, m] = reservation.startTime.split(':').map(Number);
+        const endTotal = h + (m/60) + reservation.duration;
+        const endH = Math.floor(endTotal);
+        const endM = Math.round((endTotal - endH) * 60);
+        const endTimeStr = `${String(endH).padStart(2, '0')}:${String(endM).padStart(2, '0')}`;
+        timeEl.textContent = `${reservation.startTime} - ${endTimeStr} (${reservation.duration}시간)`;
+    }
+
+    const backdrop = modalContainer.querySelector('.js-backdrop');
     if (backdrop) backdrop.addEventListener('click', closeModal);
 
-    const closeBtns = modalContainer.querySelectorAll('button');
-    closeBtns.forEach(btn => {
-        if (btn.querySelector('.material-symbols-outlined')?.innerText === 'close') {
-            btn.addEventListener('click', closeModal);
-        }
-    });
+    const closeBtns = modalContainer.querySelectorAll('.js-close-btn, .js-close-modal');
+    closeBtns.forEach(btn => btn.addEventListener('click', closeModal));
 
-    if (cancelBtn) cancelBtn.addEventListener('click', closeModal);
-
+    const deleteBtn = modalContainer.querySelector('.js-delete-btn');
     if (deleteBtn) {
-        deleteBtn.addEventListener('click', async () => {
-            if (deleteBtn.disabled) return;
-            deleteBtn.disabled = true;
+        deleteBtn.addEventListener('click', () => {
+             // Open the small confirmation modal
+             // Pass along closeModal so the confirmation can close the info modal as well if successful
+             loadModal('deleteModal.html', (container, confirmClose) => {
+                 setupDeleteModal(container, confirmClose, reservationId, closeModal);
+             });
+        });
+    }
+}
+
+function setupDeleteModal(modalContainer, closeModal, reservationId, infoModalClose) {
+    const backdrop = modalContainer.querySelector('.js-backdrop');
+    if (backdrop) backdrop.addEventListener('click', closeModal);
+
+    const closeBtns = modalContainer.querySelectorAll('.js-close-modal, .js-no-btn');
+    closeBtns.forEach(btn => btn.addEventListener('click', closeModal));
+
+    const yesBtn = modalContainer.querySelector('.js-yes-btn');
+    if (yesBtn) {
+        yesBtn.addEventListener('click', async () => {
+            if (yesBtn.disabled) return;
+            yesBtn.disabled = true;
 
             try {
-                try {
-                    const res = await fetch(`${API_BASE_URL}/reserve?reservationId=${reservationId}`, {
-                        method: 'DELETE'
-                    });
-                    const data = await res.json();
+                const res = await fetch(`${API_BASE_URL}/reserve?reservationId=${reservationId}`, {
+                    method: 'DELETE'
+                });
+                const data = await res.json();
+                
+                if (data.isSuccess) {
+                    const card = document.querySelector(`.js-reservation-card[data-id="${reservationId}"]`);
+                    if (card) card.remove();
+                    state.reservations = state.reservations.filter(r => r.id != reservationId);
                     
-                    if (data.isSuccess) {
-                        const card = document.querySelector(`.js-reservation-card[data-id="${reservationId}"]`);
-                        if (card) card.remove();
-                        // Also remove from state to match UI
-                        state.reservations = state.reservations.filter(r => r.id != reservationId);
-                        closeModal();
-                    } else {
-                        alert('삭제 실패: ' + data.message);
-                    }
-                } catch(err) {
-                    console.error(err);
-                    alert('예약 삭제 중 오류가 발생했습니다.');
+                    // Close both modals
+                    closeModal();
+                    if (infoModalClose) infoModalClose();
+                } else {
+                    alert('삭제 실패: ' + data.message);
                 }
+            } catch(err) {
+                console.error(err);
+                alert('예약 삭제 중 오류가 발생했습니다.');
             } finally {
-                deleteBtn.disabled = false;
+                yesBtn.disabled = false;
             }
         });
     }
