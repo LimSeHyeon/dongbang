@@ -552,14 +552,18 @@ function setupReservationSubmit() {
                     return;
                 }
 
-                // Check Overlap (Client-side) - Updated to "Fully Occupied" check
+                // Check Overlap (Client-side)
                 const reqStart = parseInt(hour) + (parseInt(minute) / 60);
                 const reqEnd = reqStart + duration;
 
-                if (checkFullyOccupied(state.reservations, day, reqStart, reqEnd)) {
+                const overlapStatus = checkFullyOccupied(state.reservations, day, reqStart, reqEnd);
+
+                if (overlapStatus.isFullyOccupied) {
                     alert('선택하신 시간은 이미 예약으로 꽉 차 있어 예약할 수 없습니다.');
                     return;
                 }
+                
+                const hasPartialOverlap = overlapStatus.hasPartialOverlap;
 
                 // Calculate Date
                 const targetDate = getNextDayOfWeek(day, hour, minute);
@@ -578,7 +582,11 @@ function setupReservationSubmit() {
 
                     const resData = await response.json();
                     if (resData.isSuccess) {
-                        alert('예약이 요청되었습니다! 곧 표시됩니다.');
+                        if (hasPartialOverlap) {
+                            alert('일부 겹치는 시간이 있습니다! 해당 시간은 제외하고 예약됩니다');
+                        } else {
+                            alert('예약이 요청되었습니다! 곧 표시됩니다.');
+                        }
                         fetchReservations(); // Refresh
                     } else {
                         alert('예약 실패: ' + resData.message);
@@ -720,10 +728,14 @@ function setupAdminInteractions() {
                  const reqStart = reqH + (reqM / 60);
                  const reqEnd = reqStart + parseFloat(durationVal);
 
-                 if (checkFullyOccupied(state.reservations, dayVal, reqStart, reqEnd)) {
+                 const overlapStatus = checkFullyOccupied(state.reservations, dayVal, reqStart, reqEnd);
+
+                 if (overlapStatus.isFullyOccupied) {
                      alert('선택하신 시간은 이미 예약으로 꽉 차 있어 예약할 수 없습니다.');
                      return;
                  }
+                 
+                 const hasPartialOverlap = overlapStatus.hasPartialOverlap;
                  
                  // Calculate Target Date for "dayVal" based on current week
                  // Assumes reservation is for the *current* displayed week or next occurrence?
@@ -772,7 +784,11 @@ function setupAdminInteractions() {
                     
                     const data = await response.json();
                     if (data.isSuccess) {
-                        alert('관리자 예약이 등록되었습니다.');
+                        if (hasPartialOverlap) {
+                            alert('일부 겹치는 시간이 있습니다! 해당 시간은 제외하고 예약됩니다');
+                        } else {
+                            alert('관리자 예약이 등록되었습니다.');
+                        }
                         fetchReservations();
                         // Reset form
                         document.getElementById('admin-reserve-song').value = '';
