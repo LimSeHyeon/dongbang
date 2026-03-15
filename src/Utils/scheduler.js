@@ -34,6 +34,6 @@ export const syncReservationsToDB = async () => {
     }
 }
 
-cron.schedule('*/30 * * * * *', () => {
+cron.schedule('*/15 * * * * *', () => {
     syncReservationsToDB();
 });
