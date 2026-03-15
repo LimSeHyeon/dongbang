@@ -39,6 +39,7 @@ function init() {
         state.reservationSchedule = new ReservationSchedule('reservation-schedule', {
             isAdmin: false,
             showDates: true,
+            initialDateOffset: 7,
             onWeekChange: (newDate) => {
                 fetchReservations();
             },
@@ -417,7 +418,7 @@ function setupIndexInteractions() {
             // Check if admin is logged in? For now anyone can click delete in UI, but API is delete default
             // User side deletion usually requires password or session. 
             // In this app, we just trigger the modal.
-            loadModal('deleteModal.html', (container, close) => setupDeleteModal(container, close, id));
+            loadModal('infoModal.html', (container, close) => setupInfoModal(container, close, id));
         }
     });
 
@@ -551,14 +552,19 @@ function setupReservationSubmit() {
                     return;
                 }
 
-                // Check Overlap (Client-side) - Updated to "Fully Occupied" check
+                // Check Overlap (Client-side)
                 const reqStart = parseInt(hour) + (parseInt(minute) / 60);
                 const reqEnd = reqStart + duration;
 
-                if (checkFullyOccupied(state.reservations, day, reqStart, reqEnd)) {
+                const overlapStatus = checkFullyOccupied(state.reservations, day, reqStart, reqEnd);
+
+                if (overlapStatus.isFullyOccupied) {
                     alert('선택하신 시간은 이미 예약으로 꽉 차 있어 예약할 수 없습니다.');
                     return;
                 }
+                
+                const hasPartialOverlap = overlapStatus.hasPartialOverlap;
+                const availableIntervals = overlapStatus.availableIntervals;
 
                 // Calculate Date
                 const targetDate = getNextDayOfWeek(day, hour, minute);
@@ -577,7 +583,17 @@ function setupReservationSubmit() {
 
                     const resData = await response.json();
                     if (resData.isSuccess) {
-                        alert('예약이 요청되었습니다! 곧 표시됩니다.');
+                        if (hasPartialOverlap && availableIntervals) {
+                            const formatTime = (t) => {
+                                const h = Math.floor(t).toString().padStart(2, '0');
+                                const m = Math.round((t - Math.floor(t)) * 60).toString().padStart(2, '0');
+                                return `${h}:${m}`;
+                            };
+                            const intervalsStr = availableIntervals.map(inv => `${formatTime(inv.start)} ~ ${formatTime(inv.end)}`).join(', ');
+                            alert(`기존 예약 내역과 겹치는 시간이 있습니다! 해당 시간을 제외한 ${intervalsStr}만 예약합니다`);
+                        } else {
+                            alert('예약이 요청되었습니다! 곧 표시됩니다.');
+                        }
                         fetchReservations(); // Refresh
                     } else {
                         alert('예약 실패: ' + resData.message);
@@ -719,10 +735,15 @@ function setupAdminInteractions() {
                  const reqStart = reqH + (reqM / 60);
                  const reqEnd = reqStart + parseFloat(durationVal);
 
-                 if (checkFullyOccupied(state.reservations, dayVal, reqStart, reqEnd)) {
+                 const overlapStatus = checkFullyOccupied(state.reservations, dayVal, reqStart, reqEnd);
+
+                 if (overlapStatus.isFullyOccupied) {
                      alert('선택하신 시간은 이미 예약으로 꽉 차 있어 예약할 수 없습니다.');
                      return;
                  }
+                 
+                 const hasPartialOverlap = overlapStatus.hasPartialOverlap;
+                 const availableIntervals = overlapStatus.availableIntervals;
                  
                  // Calculate Target Date for "dayVal" based on current week
                  // Assumes reservation is for the *current* displayed week or next occurrence?
@@ -771,7 +792,17 @@ function setupAdminInteractions() {
                     
                     const data = await response.json();
                     if (data.isSuccess) {
-                        alert('관리자 예약이 등록되었습니다.');
+                        if (hasPartialOverlap && availableIntervals) {
+                            const formatTime = (t) => {
+                                const h = Math.floor(t).toString().padStart(2, '0');
+                                const m = Math.round((t - Math.floor(t)) * 60).toString().padStart(2, '0');
+                                return `${h}:${m}`;
+                            };
+                            const intervalsStr = availableIntervals.map(inv => `${formatTime(inv.start)} ~ ${formatTime(inv.end)}`).join(', ');
+                            alert(`기존 예약 내역과 겹치는 시간이 있습니다! 해당 시간을 제외한 ${intervalsStr}만 예약합니다`);
+                        } else {
+                            alert('관리자 예약이 등록되었습니다.');
+                        }
                         fetchReservations();
                         // Reset form
                         document.getElementById('admin-reserve-song').value = '';
@@ -793,7 +824,7 @@ function setupAdminInteractions() {
         const card = e.target.closest('.js-reservation-card');
         if (card) {
             const id = card.getAttribute('data-id');
-            loadModal('deleteModal.html', (container, close) => setupDeleteModal(container, close, id));
+            loadModal('infoModal.html', (container, close) => setupInfoModal(container, close, id));
         }
     });
 
@@ -1101,85 +1132,88 @@ function setupLoginModal(modalContainer, closeModal, isPageGate = false) {
     }
 }
 
-function setupDeleteModal(modalContainer, closeModal, reservationId) {
-    const cancelBtn = Array.from(modalContainer.querySelectorAll('button')).find(b => b.innerText.includes('Cancel') || b.innerText.includes('취소'));
-    const deleteBtn = Array.from(modalContainer.querySelectorAll('button')).find(b => b.innerText.includes('Delete') || b.innerText.includes('삭제'));
-    
-    // Populate Data
+function setupInfoModal(modalContainer, closeModal, reservationId) {
     const reservation = state.reservations.find(r => r.id == reservationId);
-    if (reservation) {
-        // Find elements
-        // The structure is quite specific in deleteModal.html
-        const infoContainer = modalContainer.querySelector('.mt-6.rounded-lg');
-        if (infoContainer) {
-            const titleEl = infoContainer.querySelector('p.font-semibold');
-            if (titleEl) titleEl.innerText = reservation.title;
-
-            // Day and Time are in nested spans. 
-            // We can try to select them by icon proximity or structure.
-            const metaSpans = infoContainer.querySelectorAll('.text-xs span.flex.items-center.gap-1');
-            
-            // First span is Day (has calendar_today icon)
-            if (metaSpans[0]) {
-                const dayText = metaSpans[0].lastChild; // The text node after the icon span
-                if (dayText) dayText.textContent = reservation.day.charAt(0).toUpperCase() + reservation.day.slice(1);
-            }
-
-            // Second span is Time (has schedule icon)
-            if (metaSpans[1]) {
-                const timeText = metaSpans[1].lastChild;
-                
-                // Calculate end time
-                const [h, m] = reservation.startTime.split(':').map(Number);
-                const endTotal = h + (m/60) + reservation.duration;
-                const endH = Math.floor(endTotal);
-                const endM = Math.round((endTotal - endH) * 60);
-                const endTimeStr = `${String(endH).padStart(2, '0')}:${String(endM).padStart(2, '0')}`;
-                
-                if (timeText) timeText.textContent = `${reservation.startTime} - ${endTimeStr}`;
-            }
-        }
+    if (!reservation) {
+        closeModal();
+        return;
     }
 
-    const backdrop = modalContainer.querySelector('.backdrop-blur-sm');
+    const titleEl = modalContainer.querySelector('.info-title');
+    if (titleEl) titleEl.innerText = reservation.title;
+
+    const dayEl = modalContainer.querySelector('.info-day');
+    if (dayEl) {
+        const dayNamesKO = { 'mon': '월요일', 'tue': '화요일', 'wed': '수요일', 'thu': '목요일', 'fri': '금요일', 'sat': '토요일', 'sun': '일요일' };
+        dayEl.innerText = dayNamesKO[reservation.day] || reservation.day;
+    }
+
+    const timeEl = modalContainer.querySelector('.info-time');
+    if (timeEl) {
+        const [h, m] = reservation.startTime.split(':').map(Number);
+        const endTotal = h + (m/60) + reservation.duration;
+        const endH = Math.floor(endTotal);
+        const endM = Math.round((endTotal - endH) * 60);
+        const endTimeStr = `${String(endH).padStart(2, '0')}:${String(endM).padStart(2, '0')}`;
+        timeEl.textContent = `${reservation.startTime} - ${endTimeStr} (${reservation.duration}시간)`;
+    }
+
+    const backdrop = modalContainer.querySelector('.js-backdrop');
     if (backdrop) backdrop.addEventListener('click', closeModal);
 
-    const closeBtns = modalContainer.querySelectorAll('button');
-    closeBtns.forEach(btn => {
-        if (btn.querySelector('.material-symbols-outlined')?.innerText === 'close') {
-            btn.addEventListener('click', closeModal);
-        }
-    });
+    const closeBtns = modalContainer.querySelectorAll('.js-close-btn, .js-close-modal');
+    closeBtns.forEach(btn => btn.addEventListener('click', closeModal));
 
-    if (cancelBtn) cancelBtn.addEventListener('click', closeModal);
-
+    const deleteBtn = modalContainer.querySelector('.js-delete-btn');
     if (deleteBtn) {
-        deleteBtn.addEventListener('click', async () => {
-            if (deleteBtn.disabled) return;
-            deleteBtn.disabled = true;
+        deleteBtn.addEventListener('click', () => {
+             // Open the small confirmation modal
+             // Pass along closeModal so the confirmation can close the info modal as well if successful
+             loadModal('deleteModal.html', (container, confirmClose) => {
+                 setupDeleteModal(container, confirmClose, reservationId, closeModal);
+             });
+        });
+    }
+}
+
+function setupDeleteModal(modalContainer, closeModal, reservationId, infoModalClose) {
+    const backdrop = modalContainer.querySelector('.js-backdrop');
+    if (backdrop) backdrop.addEventListener('click', closeModal);
+
+    const closeBtns = modalContainer.querySelectorAll('.js-close-modal, .js-no-btn');
+    closeBtns.forEach(btn => btn.addEventListener('click', closeModal));
+
+    const yesBtn = modalContainer.querySelector('.js-yes-btn');
+    if (yesBtn) {
+        yesBtn.addEventListener('click', async () => {
+            if (yesBtn.disabled) return;
+            yesBtn.disabled = true;
 
             try {
-                try {
-                    const res = await fetch(`${API_BASE_URL}/reserve?reservationId=${reservationId}`, {
-                        method: 'DELETE'
-                    });
-                    const data = await res.json();
+                const res = await fetch(`${API_BASE_URL}/reserve?reservationId=${reservationId}`, {
+                    method: 'DELETE'
+                });
+                const data = await res.json();
+                
+                if (data.isSuccess) {
+                    const card = document.querySelector(`.js-reservation-card[data-id="${reservationId}"]`);
+                    if (card) card.remove();
+                    state.reservations = state.reservations.filter(r => r.id != reservationId);
                     
-                    if (data.isSuccess) {
-                        const card = document.querySelector(`.js-reservation-card[data-id="${reservationId}"]`);
-                        if (card) card.remove();
-                        // Also remove from state to match UI
-                        state.reservations = state.reservations.filter(r => r.id != reservationId);
-                        closeModal();
-                    } else {
-                        alert('삭제 실패: ' + data.message);
-                    }
-                } catch(err) {
-                    console.error(err);
-                    alert('예약 삭제 중 오류가 발생했습니다.');
+                    // Close both modals
+                    closeModal();
+                    if (infoModalClose) infoModalClose();
+
+                    // Refresh to reflect on mobile day views and grid fully
+                    fetchReservations();
+                } else {
+                    alert('삭제 실패: ' + data.message);
                 }
+            } catch(err) {
+                console.error(err);
+                alert('예약 삭제 중 오류가 발생했습니다.');
             } finally {
-                deleteBtn.disabled = false;
+                yesBtn.disabled = false;
             }
         });
     }
