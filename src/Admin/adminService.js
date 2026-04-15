@@ -29,3 +29,8 @@ export const getWeeklyHistory = async() => {
     const { result, summary } = await AdminDAO.selectSevenDaysHistory();
     return AdminDTO.historyDTO(result, summary);
 }
+
+export const getDeleteHistory = async() => {
+    const result = await AdminDAO.selectSevenDaysDeletedHistory();
+    return AdminDTO.deletedHistoryDTO(result);
+}

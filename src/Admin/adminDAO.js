@@ -89,3 +89,13 @@ export const selectSevenDaysHistory = async() => {
         summary : summary[0]
     };
 }
+
+export const selectSevenDaysDeletedHistory = async() => {
+    const query = `
+        SELECT * FROM delete_history 
+        WHERE deleted_time >= DATE_SUB(NOW(), INTERVAL 7 DAY)
+        ORDER BY deleted_time DESC;
+    `;
+    const [result] = await pool.query(query);
+    return result;
+}
