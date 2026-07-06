@@ -24,5 +24,9 @@ export const status = {
     REDIS_CONNECT: {status: 500, "isSuccess": false, "message": "레디스 오류입니다."},
 
     //Admin error
-    PASSWORD_CHANGE_ERROR: {status: 400, "isSuccess": false, "message": "비밀번호 재설정 오류"}
+    PASSWORD_CHANGE_ERROR: {status: 400, "isSuccess": false, "message": "비밀번호 재설정 오류"},
+
+    //Reservation error
+    RESERVATION_CONFLICT: {status: 400, "isSuccess": false, "message": "예약 중복"}
+
 };

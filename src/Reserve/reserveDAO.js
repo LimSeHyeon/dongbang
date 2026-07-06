@@ -157,3 +157,61 @@ export const selectReserveByPeriod = async(startDate, endDate) => {
         });
     }
 }
+
+//자기 자신을 제외하고 겹치는 예약 조회
+const getConflictingReserve = async (connection, startTime, endTime, excludeId) => {
+    const query = `
+        SELECT reservation_id, start_time, end_time
+        FROM reservation
+        WHERE start_time < ?
+          AND end_time > ?
+          AND reservation_id != ?
+        FOR UPDATE;
+    `;
+    const [rows] = await connection.execute(query, [endTime, startTime, excludeId]);
+    return rows;
+};
+
+//예약 수정
+export const updateReserve = async(req) => {
+    const { reservationId, changeStartTime, changeEndTime } = req;
+    const selectReserveQuery = `SELECT reservation_id, start_time, end_time FROM reservation WHERE reservation_id = ? FOR UPDATE;`
+    const updateQuery = `UPDATE reservation SET start_time = ? , end_time = ? WHERE reservation_id = ?;`
+    const connection = await pool.getConnection();
+
+    try {
+        await connection.beginTransaction();
+
+        //예약 행 잠금
+        const [target] = await connection.execute(selectReserveQuery, [reservationId])
+
+        if(target.length === 0) throw new BaseError({
+            ...status.DATA_NOT_FOUND,
+            message: "존재하지 않는 예약입니다."
+        });
+        
+        //예약 가능한지 확인
+        const existingReserve = await getConflictingReserve(connection, changeStartTime, changeEndTime, reservationId);
+        if (existingReserve.length > 0) {
+            throw new BaseError({
+                ...status.RESERVATION_CONFLICT, // 없다면 status에 추가
+                message: "변경하려는 시간대에 이미 예약이 존재합니다."
+            });
+        }
+
+        //수정 가능하면 수정하고 저장
+        await connection.execute(updateQuery, [changeStartTime, changeEndTime, reservationId]);
+        
+        await connection.commit();
+        return { reservationId, startTime: changeStartTime, endTime: changeEndTime };
+
+    } catch (err) {
+        await connection.rollback();
+        throw new BaseError({
+            ...status.DB_ERROR,
+            message: err.message
+        });
+    } finally {
+        connection.release();
+    }
+}

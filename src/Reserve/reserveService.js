@@ -42,13 +42,13 @@ export const saveHistory = async({ songName, startTime, hapjuTerm, requestedAt }
 }
 
 export const createReservation = async(req, requestedAt, byAdmin) => {
-    const reserveInfo = await checkBeforeCreateReservation(req, requestedAt, byAdmin);
+    const reserveInfo = await prepareReservationTime(req, requestedAt, byAdmin);
     const result = await checkReserve(reserveInfo);
     
     return result;
 }
 
-const checkBeforeCreateReservation = async(req, requestedAt, byAdmin) => {
+const prepareReservationTime = async(req, requestedAt, byAdmin) => {
     const { songName, startTime, hapjuTerm } = req;
     const startTimeDate = moment(startTime).tz('Asia/Seoul');
 
@@ -98,4 +98,11 @@ export const getWeeklyReserve = async(startDate) => {
 
     const result = await ReserveDAO.selectReserveByPeriod(formattedStart, formattedEnd);
     return ReserveDTO.reserveListDTO(result, formattedStart, formattedEnd);
+}
+
+export const checkAndChangeReserve = async(req) => {
+    const {reqInfo, requestedAt, byAdmin} = req;
+    const { startTime, endTime } = await prepareReservationTime(reqInfo, requestedAt, byAdmin);
+
+    return await ReserveDAO.updateReserve({reservationId: reqInfo.reservationId, changeStartTime:startTime, changeEndTime:endTime});
 }
