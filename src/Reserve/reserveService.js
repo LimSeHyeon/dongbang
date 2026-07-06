@@ -42,6 +42,13 @@ export const saveHistory = async({ songName, startTime, hapjuTerm, requestedAt }
 }
 
 export const createReservation = async(req, requestedAt, byAdmin) => {
+    const reserveInfo = await checkBeforeCreateReservation(req, requestedAt, byAdmin);
+    const result = await checkReserve(reserveInfo);
+    
+    return result;
+}
+
+const checkBeforeCreateReservation = async(req, requestedAt, byAdmin) => {
     const { songName, startTime, hapjuTerm } = req;
     const startTimeDate = moment(startTime).tz('Asia/Seoul');
 
@@ -67,8 +74,12 @@ export const createReservation = async(req, requestedAt, byAdmin) => {
     const formattedStart = startTimeDate.format('YYYY-MM-DD HH:mm:ss');
     const formattedEnd = endTimeDate.format('YYYY-MM-DD HH:mm:ss');
     const formattedRequest = moment(requestedAt).tz('Asia/Seoul').format('YYYY-MM-DD HH:mm:ss');
+    return { songName, startTime: formattedStart, endTime: formattedEnd, requestTime: formattedRequest, byAdmin };
+}
 
-    const result = await ReserveDAO.createReservation(songName, formattedStart, formattedEnd, formattedRequest, byAdmin);
+const checkReserve = async(reqData) => {
+    const {songName, startTime, endTime, requestTime, byAdmin} = reqData;
+    const result = await ReserveDAO.createReservation(songName, startTime, endTime, requestTime, byAdmin);
     return result;
 }
 
