@@ -105,18 +105,36 @@ export const createReservation = async (songName, startTime, endTime, requestTim
     }
 }
 
+//예약 삭제
 export const deleteReserve = async(reservationId) => {
-    const query = `DELETE FROM reservation WHERE reservation_id = ?;`;
+
+    const connection = await pool.getConnection();
+    const selectQuery = `SELECT song_name, start_time, end_time FROM reservation WHERE reservation_id = ?;`
+    const saveQuery = `INSERT INTO delete_history (song_name, start_time, end_time) VALUES (?, ?, ?);`
+    const deleteQuery = `DELETE FROM reservation WHERE reservation_id = ?;`;
     try {
-        const [result] = await pool.query(query, [reservationId]);
-        return result.affectedRows>0;
+        await connection.beginTransaction();
+        
+        const [selectResult] = await connection.query(selectQuery, [reservationId]);
+        if(selectResult.length===0) return false;
+
+        await connection.query(saveQuery, [selectResult[0].song_name, selectResult[0].start_time, selectResult[0].end_time]);
+        
+        const [deleteResult] = await connection.query(deleteQuery, [reservationId]);
+
+        await connection.commit();
+        return deleteResult.affectedRows>0;
     }
     catch (err) {
         console.error(err);
+        await connection.rollback();
         throw new BaseError({
             ...status.DB_ERROR,
             message: err.message
         });
+    }
+    finally {
+        connection.release();
     }
 }
 

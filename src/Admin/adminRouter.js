@@ -15,3 +15,5 @@ adminRouter.post('/reserve', AdminController.requestReserve);
 adminRouter.get('/history', AdminController.getHistory);
 
 adminRouter.get('/setting', AdminController.getSettingInfo);
+
+adminRouter.get('/delete-history', AdminController.getDeleteHistory);

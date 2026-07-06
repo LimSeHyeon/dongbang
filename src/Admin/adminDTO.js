@@ -31,3 +31,14 @@ export const historyDTO = (data, summary) => {
         }))
     }
 };
+
+export const deletedHistoryDTO = (data) => {
+    return {
+        data : data.map(item => ({
+            "songName" : item.song_name,
+            "startTime" : moment(item.start_time.toISOString().replace('T', ' ').replace('Z', '')).format('YYYY-MM-DD HH:mm:ss'),
+            "endTime" : moment(item.end_time.toISOString().replace('T', ' ').replace('Z', '')).format('YYYY-MM-DD HH:mm:ss'),
+            "deletedTime" : moment(item.deleted_time.toISOString().replace('T', ' ').replace('Z', '')).format('YYYY-MM-DD HH:mm:ss')
+        }))
+    }
+}

@@ -25,3 +25,7 @@ export const requestReserve = async (req, res, next) => {
 export const getHistory = async (req, res, next) => {
     res.send(response(status.SUCCESS, await AdminService.getWeeklyHistory()));
 }
+
+export const getDeleteHistory = async (req, res, next) => {
+    res.send(response(status.SUCCESS, await AdminService.getDeleteHistory()));
+}

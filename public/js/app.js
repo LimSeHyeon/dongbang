@@ -647,6 +647,13 @@ function setupAdminInteractions() {
         });
     }
 
+    const deleteHistoryBtn = document.getElementById('view-delete-history-btn');
+    if (deleteHistoryBtn) {
+        deleteHistoryBtn.addEventListener('click', () => {
+            loadModal('deleteHistoryModal.html', setupDeleteHistoryModal);
+        });
+    }
+
     const logoutBtns = document.querySelectorAll('button');
     logoutBtns.forEach(btn => {
         if (btn.innerText.includes('로그아웃') || btn.innerText.includes('Logout')) {
@@ -1352,4 +1359,147 @@ function setupHistoryModal(modalContainer, closeModal) {
     }
 
     loadHistoryData();
+}
+
+function setupDeleteHistoryModal(modalContainer, closeModal) {
+    const closeViewerBtn = Array.from(modalContainer.querySelectorAll('button')).find(b => b.innerText.includes('닫기') || b.innerText.includes('Close'));
+    if (closeViewerBtn) closeViewerBtn.addEventListener('click', closeModal);
+    
+    if (modalContainer.querySelector('.backdrop-blur-sm')) {
+         const backdropEl = modalContainer.querySelector('.backdrop-blur-sm');
+         if (backdropEl) {
+             backdropEl.addEventListener('click', (e) => {
+                 if (e.target === backdropEl) closeModal();
+             });
+         }
+    }
+
+    const closeBtns = modalContainer.querySelectorAll('.js-close-modal');
+    closeBtns.forEach(btn => {
+         btn.addEventListener('click', closeModal);
+    });
+
+    const refreshBtn = modalContainer.querySelector('#delete-history-refresh-btn');
+    if (refreshBtn) {
+        refreshBtn.addEventListener('click', () => {
+             const icon = refreshBtn.querySelector('.material-symbols-outlined');
+             if(icon) {
+                 icon.classList.add('animate-spin');
+                 setTimeout(() => icon.classList.remove('animate-spin'), 1000);
+             }
+             loadDeleteHistoryData();
+        });
+    }
+
+    // Fetch Delete History Data
+    async function loadDeleteHistoryData() {
+        try {
+            const res = await fetch(`${API_BASE_URL}/admin/delete-history`);
+            const data = await res.json();
+            
+            if (data.isSuccess) {
+                const rows = data.result.data;
+
+                // Update Summary
+                const countEl = modalContainer.querySelector('#delete-history-total-count');
+                if(countEl) countEl.innerText = rows.length;
+
+                // Update Table
+                const tbody = modalContainer.querySelector('#delete-history-table-body');
+                if (tbody) {
+                    tbody.innerHTML = ''; // Clear mock data
+                    if (rows.length === 0) {
+                        tbody.innerHTML = `
+                            <tr>
+                                <td colspan="4" class="py-12 text-center text-slate-400 dark:text-slate-500">
+                                    <div class="flex flex-col items-center justify-center">
+                                        <span class="material-symbols-outlined text-4xl mb-2 opacity-30">delete_outline</span>
+                                        <p class="text-sm">삭제된 예약 기록이 없습니다.</p>
+                                    </div>
+                                </td>
+                            </tr>
+                        `;
+                    } else {
+                        rows.forEach((row, idx) => {
+                             const tr = document.createElement('tr');
+                             tr.className = 'hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors group';
+                             
+                             // Red/Rose/Orange themed colors for deletion
+                             const colors = ['red', 'rose', 'orange', 'pink'];
+                             const color = colors[idx % colors.length];
+                             
+                             tr.innerHTML = `
+                                 <td class="py-3 px-4">
+                                     <div class="flex items-center gap-3">
+                                         <div class="w-8 h-8 rounded bg-${color}-100 dark:bg-${color}-900/30 text-${color}-600 dark:text-${color}-400 flex items-center justify-center shrink-0">
+                                             <span class="material-symbols-outlined text-sm">music_note</span>
+                                         </div>
+                                         <span class="font-medium text-slate-900 dark:text-slate-200">${row.songName}</span>
+                                     </div>
+                                 </td>
+                                 <td class="py-3 px-4 text-sm text-slate-600 dark:text-slate-400">${row.startTime}</td>
+                                 <td class="py-3 px-4 text-sm text-slate-600 dark:text-slate-400">${row.endTime}</td>
+                                 <td class="py-3 px-4 text-sm text-red-500 font-medium">${row.deletedTime}</td>
+                             `;
+                             tbody.appendChild(tr);
+                        });
+                    }
+
+                    // Populate Mobile List
+                    const mobileList = modalContainer.querySelector('#delete-history-mobile-list');
+                    if (mobileList) {
+                        mobileList.innerHTML = '';
+                        if (rows.length === 0) {
+                            mobileList.innerHTML = `
+                                <div class="flex flex-col items-center justify-center py-12 text-slate-400">
+                                    <span class="material-symbols-outlined text-5xl mb-3 opacity-30">delete_outline</span>
+                                    <p class="text-sm">삭제된 예약 기록이 없습니다.</p>
+                                </div>
+                            `;
+                        } else {
+                            rows.forEach((row, idx) => {
+                                 const div = document.createElement('div');
+                                 div.className = 'p-4 bg-white dark:bg-[#1e2a38] border-b border-slate-100 dark:border-slate-700';
+                                 
+                                 const colors = ['red', 'rose', 'orange', 'pink'];
+                                 const color = colors[idx % colors.length];
+    
+                                 div.innerHTML = `
+                                    <div class="flex items-start gap-4">
+                                        <div class="w-10 h-10 rounded-lg bg-${color}-100 dark:bg-${color}-900/30 text-${color}-600 dark:text-${color}-400 flex items-center justify-center shrink-0 mt-0.5">
+                                            <span class="material-symbols-outlined">music_note</span>
+                                        </div>
+                                        <div class="flex-1 min-w-0">
+                                            <h4 class="text-sm font-semibold text-slate-900 dark:text-white truncate">${row.songName}</h4>
+                                            <div class="mt-1 flex flex-col gap-1 text-xs text-slate-500 dark:text-slate-400">
+                                                <span class="flex items-center gap-1">
+                                                    <span class="material-symbols-outlined text-[14px]">play_arrow</span>
+                                                    시작: ${row.startTime}
+                                                </span>
+                                                <span class="flex items-center gap-1">
+                                                    <span class="material-symbols-outlined text-[14px]">stop</span>
+                                                    종료: ${row.endTime}
+                                                </span>
+                                            </div>
+                                            <div class="mt-2 text-xs text-red-500 font-medium flex items-center gap-1">
+                                                <span class="material-symbols-outlined text-[14px]">delete</span>
+                                                삭제: ${row.deletedTime}
+                                            </div>
+                                        </div>
+                                    </div>
+                                 `;
+                                 mobileList.appendChild(div);
+                            });
+                        }
+                    }
+                }
+            } else {
+                console.error('Failed to load delete history:', data.message);
+            }
+        } catch (err) {
+            console.error('Error fetching delete history:', err);
+        }
+    }
+
+    loadDeleteHistoryData();
 }
