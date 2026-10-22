@@ -9,3 +9,5 @@ reserveRouter.post('', checkTime, ReserveController.requestReserveInfo);
 reserveRouter.delete('', ReserveController.cancelReserve);
 
 reserveRouter.get('/week', ReserveController.getReserve);
+
+reserveRouter.patch('/change', ReserveController.changeReserve);
